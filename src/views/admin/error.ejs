@@ -1,0 +1,10 @@
+<%- include('../partials/head', { title: 'Error' }) %>
+<div style="display:flex; align-items:center; justify-content:center; min-height:100vh;">
+  <div style="text-align:center; max-width:400px;">
+    <div style="font-size:48px; margin-bottom:16px;">⚠️</div>
+    <h2 style="margin-bottom:8px;">Something went wrong</h2>
+    <p class="text-muted" style="margin-bottom:24px;"><%= message || 'An unexpected error occurred.' %></p>
+    <a href="/admin" class="btn btn-primary">← Back to Dashboard</a>
+  </div>
+</div>
+</body></html>

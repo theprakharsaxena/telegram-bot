@@ -1,0 +1,26 @@
+<div class="sidebar">
+  <div class="sidebar-brand">⭐ <%= botName %></div>
+  <nav class="sidebar-nav">
+    <a href="/admin" class="<%= page === 'overview'  ? 'active' : '' %>">
+      <span class="icon">📊</span> Overview
+    </a>
+    <a href="/admin/users" class="<%= page === 'users' ? 'active' : '' %>">
+      <span class="icon">👥</span> Users
+    </a>
+    <a href="/admin/revenue" class="<%= page === 'revenue' ? 'active' : '' %>">
+      <span class="icon">💰</span> Revenue
+    </a>
+    <a href="/admin/settings" class="<%= page === 'settings' ? 'active' : '' %>">
+      <span class="icon">⚙️</span> Settings
+    </a>
+    <hr style="border-color: #2d2d44; margin: 12px 20px;">
+    <a href="/health" target="_blank">
+      <span class="icon">❤️</span> Health Check
+    </a>
+    <form action="/admin/logout" method="POST" style="margin-top: auto;">
+      <button type="submit" class="btn btn-ghost" style="width:100%; justify-content:flex-start; padding: 10px 20px; border-radius:0; border:none;">
+        <span class="icon">🚪</span> Logout
+      </button>
+    </form>
+  </nav>
+</div>

@@ -1,0 +1,128 @@
+<%- include('../partials/head', { title: 'Users' }) %>
+<div class="layout">
+  <%- include('../partials/sidebar') %>
+  <main class="main">
+    <div class="page-header">
+      <h1>Users</h1>
+      <p><%= total.toLocaleString() %> total users</p>
+    </div>
+
+    <!-- Search & filter -->
+    <div class="card" style="margin-bottom:20px;">
+      <form method="GET" action="/admin/users" style="display:flex; gap:12px; flex-wrap:wrap;">
+        <input type="text" name="search" placeholder="Search by name, username, or Telegram ID"
+               value="<%= search %>" style="flex:1; min-width:200px;">
+        <select name="plan" style="width:140px;">
+          <option value="">All plans</option>
+          <option value="free"    <%= planFilter === 'free'    ? 'selected' : '' %>>Free</option>
+          <option value="premium" <%= planFilter === 'premium' ? 'selected' : '' %>>Premium</option>
+        </select>
+        <button type="submit" class="btn btn-primary">Search</button>
+        <a href="/admin/users" class="btn btn-ghost">Clear</a>
+      </form>
+    </div>
+
+    <div class="card">
+      <table>
+        <thead>
+          <tr>
+            <th>User</th>
+            <th>Telegram ID</th>
+            <th>Plan</th>
+            <th>Joined</th>
+            <th>Last Active</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% users.forEach(u => { %>
+            <tr>
+              <td>
+                <strong><%= u.firstName || '' %> <%= u.lastName || '' %></strong>
+                <% if (u.username) { %><br><span class="text-muted">@<%= u.username %></span><% } %>
+              </td>
+              <td class="text-muted"><%= u.telegramId %></td>
+              <td>
+                <span class="badge <%= u.plan === 'premium' ? 'badge-premium' : 'badge-free' %>">
+                  <%= u.plan %>
+                </span>
+              </td>
+              <td class="text-muted"><%= new Date(u.createdAt).toLocaleDateString() %></td>
+              <td class="text-muted">
+                <%= u.stats?.lastActiveAt ? new Date(u.stats.lastActiveAt).toLocaleDateString() : '—' %>
+              </td>
+              <td>
+                <% if (u.isBanned) { %>
+                  <span class="badge badge-expired">Banned</span>
+                <% } else { %>
+                  <span class="badge badge-active">Active</span>
+                <% } %>
+              </td>
+              <td>
+                <% if (u.isBanned) { %>
+                  <button class="btn btn-ghost btn-sm"
+                          onclick="adminAction('/admin/users/unban', { telegramId: '<%= u.telegramId %>' })">
+                    Unban
+                  </button>
+                <% } else { %>
+                  <button class="btn btn-danger btn-sm"
+                          onclick="adminAction('/admin/users/ban', { telegramId: '<%= u.telegramId %>', reason: 'Admin action' })">
+                    Ban
+                  </button>
+                <% } %>
+              </td>
+            </tr>
+          <% }) %>
+          <% if (users.length === 0) { %>
+            <tr><td colspan="7" class="text-muted" style="text-align:center; padding:32px;">No users found.</td></tr>
+          <% } %>
+        </tbody>
+      </table>
+
+      <!-- Pagination -->
+      <% if (totalPages > 1) { %>
+        <div style="display:flex; gap:8px; justify-content:center; margin-top:20px;">
+          <% for (let i = 1; i <= totalPages; i++) { %>
+            <a href="/admin/users?page=<%= i %>&search=<%= search %>&plan=<%= planFilter %>"
+               class="btn <%= i === currentPage ? 'btn-primary' : 'btn-ghost' %> btn-sm">
+              <%= i %>
+            </a>
+          <% } %>
+        </div>
+      <% } %>
+    </div>
+  </main>
+</div>
+
+<div id="toast" style="display:none; position:fixed; bottom:24px; right:24px;
+     background:#1a1a2e; border:1px solid #2d2d44; padding:12px 20px;
+     border-radius:8px; font-size:14px; z-index:9999;"></div>
+
+<script>
+async function adminAction(url, body) {
+  if (!confirm('Are you sure?')) return;
+  try {
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json',
+                 'X-Admin-Key': '' }, // optionally pass key
+      body: JSON.stringify(body),
+    });
+    const data = await res.json();
+    showToast(data.message || 'Done', data.status === 'ok');
+    if (data.status === 'ok') setTimeout(() => location.reload(), 1200);
+  } catch (e) {
+    showToast('Request failed', false);
+  }
+}
+function showToast(msg, ok) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.style.display = 'block';
+  t.style.borderColor = ok ? '#059669' : '#dc2626';
+  t.style.color = ok ? '#34d399' : '#f87171';
+  setTimeout(() => { t.style.display = 'none'; }, 3000);
+}
+</script>
+</body></html>

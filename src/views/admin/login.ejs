@@ -1,0 +1,36 @@
+<%- include('../partials/head') %>
+<style>
+  .login-wrap { display:flex; align-items:center; justify-content:center;
+                min-height:100vh; padding: 20px; }
+  .login-box  { background:#1a1a2e; border:1px solid #2d2d44; border-radius:12px;
+                padding:40px; width:100%; max-width:380px; }
+  .login-logo { text-align:center; font-size:40px; margin-bottom:8px; }
+  .login-title{ text-align:center; font-size:22px; font-weight:700; margin-bottom:4px; }
+  .login-sub  { text-align:center; color:#64748b; font-size:14px; margin-bottom:28px; }
+</style>
+<div class="login-wrap">
+  <div class="login-box">
+    <div class="login-logo">⭐</div>
+    <div class="login-title"><%= botName %></div>
+    <div class="login-sub">Admin Dashboard</div>
+
+    <% if (error) { %>
+      <div class="alert alert-error"><%= error %></div>
+    <% } %>
+
+    <form method="POST" action="/admin/login">
+      <div class="form-group">
+        <label>Username</label>
+        <input type="text" name="username" autocomplete="username" required>
+      </div>
+      <div class="form-group">
+        <label>Password</label>
+        <input type="password" name="password" autocomplete="current-password" required>
+      </div>
+      <button type="submit" class="btn btn-primary" style="width:100%; justify-content:center; margin-top:8px;">
+        Sign In
+      </button>
+    </form>
+  </div>
+</div>
+</body></html>

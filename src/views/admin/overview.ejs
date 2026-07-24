@@ -1,0 +1,99 @@
+<%- include('../partials/head', { title: 'Overview' }) %>
+<div class="layout">
+  <%- include('../partials/sidebar') %>
+  <main class="main">
+    <% if (maintenanceMode) { %>
+      <div class="maintenance-banner">⚠️ Maintenance mode is <strong>ON</strong> — users cannot send messages.</div>
+    <% } %>
+
+    <div class="page-header">
+      <h1>Dashboard Overview</h1>
+      <p>Real-time stats for <%= botName %></p>
+    </div>
+
+    <!-- Stat cards -->
+    <div class="grid-4">
+      <div class="card">
+        <div class="card-title">Total Users</div>
+        <div class="card-value"><%= totalUsers.toLocaleString() %></div>
+        <div class="card-sub"><%= weekTotals.newUsers %> new this week</div>
+      </div>
+      <div class="card">
+        <div class="card-title">Premium Users</div>
+        <div class="card-value text-purple"><%= premiumUsers.toLocaleString() %></div>
+        <div class="card-sub"><%= totalUsers > 0 ? Math.round(premiumUsers/totalUsers*100) : 0 %>% conversion</div>
+      </div>
+      <div class="card">
+        <div class="card-title">Messages (7d)</div>
+        <div class="card-value"><%= weekTotals.messages.toLocaleString() %></div>
+        <div class="card-sub">Today: <%= (today.totalMessages || 0).toLocaleString() %></div>
+      </div>
+      <div class="card">
+        <div class="card-title">Revenue (7d)</div>
+        <div class="card-value text-green">⭐ <%= weekTotals.revenue.toLocaleString() %></div>
+        <div class="card-sub">Today: ⭐ <%= (today.totalStarsEarned || 0).toLocaleString() %></div>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <!-- Recent payments -->
+      <div class="card">
+        <div class="card-title">Recent Payments</div>
+        <% if (recentPayments.length === 0) { %>
+          <p class="text-muted mt-16">No payments yet.</p>
+        <% } else { %>
+          <table>
+            <thead><tr><th>Plan</th><th>Stars</th><th>Date</th></tr></thead>
+            <tbody>
+              <% recentPayments.forEach(p => { %>
+                <tr>
+                  <td><span class="badge badge-premium"><%= p.planType %></span></td>
+                  <td>⭐ <%= p.starsAmount %></td>
+                  <td class="text-muted"><%= p.completedAt ? new Date(p.completedAt).toLocaleDateString() : '—' %></td>
+                </tr>
+              <% }) %>
+            </tbody>
+          </table>
+        <% } %>
+      </div>
+
+      <!-- Queue stats -->
+      <div class="card">
+        <div class="card-title">Image Generation Queue</div>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:12px;">
+          <div><div class="text-muted" style="font-size:12px;">Waiting</div>
+               <div style="font-size:24px; font-weight:700;"><%= queueStats.waiting %></div></div>
+          <div><div class="text-muted" style="font-size:12px;">Active</div>
+               <div style="font-size:24px; font-weight:700; color:#fbbf24"><%= queueStats.active %></div></div>
+          <div><div class="text-muted" style="font-size:12px;">Completed</div>
+               <div style="font-size:24px; font-weight:700; color:#34d399"><%= queueStats.completed %></div></div>
+          <div><div class="text-muted" style="font-size:12px;">Failed</div>
+               <div style="font-size:24px; font-weight:700; color:#f87171"><%= queueStats.failed %></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 7-day chart data (text table fallback) -->
+    <div class="card">
+      <div class="card-title">7-Day Activity</div>
+      <table>
+        <thead><tr><th>Date</th><th>New Users</th><th>Messages</th><th>Images</th><th>Stars</th></tr></thead>
+        <tbody>
+          <% weekAnalytics.forEach(day => { %>
+            <tr>
+              <td><%= day.date %></td>
+              <td><%= day.newUsers || 0 %></td>
+              <td><%= (day.totalMessages || 0).toLocaleString() %></td>
+              <td><%= day.totalImagesGenerated || 0 %></td>
+              <td>⭐ <%= day.totalStarsEarned || 0 %></td>
+            </tr>
+          <% }) %>
+          <% if (weekAnalytics.length === 0) { %>
+            <tr><td colspan="5" class="text-muted">No data yet.</td></tr>
+          <% } %>
+        </tbody>
+      </table>
+    </div>
+  </main>
+</div>
+</body></html>

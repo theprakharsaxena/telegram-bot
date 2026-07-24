@@ -1,0 +1,97 @@
+<%- include('../partials/head', { title: 'Revenue' }) %>
+<div class="layout">
+  <%- include('../partials/sidebar') %>
+  <main class="main">
+    <div class="page-header">
+      <h1>Revenue</h1>
+      <p>Telegram Stars earnings overview</p>
+    </div>
+
+    <!-- Period selector -->
+    <div style="display:flex; gap:8px; margin-bottom:20px;">
+      <% [7, 30, 90].forEach(d => { %>
+        <a href="/admin/revenue?days=<%= d %>"
+           class="btn <%= days === d ? 'btn-primary' : 'btn-ghost' %> btn-sm">
+          Last <%= d %> days
+        </a>
+      <% }) %>
+    </div>
+
+    <!-- Summary cards -->
+    <div class="grid-4" style="grid-template-columns: repeat(3, 1fr);">
+      <div class="card">
+        <div class="card-title">Total Stars Earned</div>
+        <div class="card-value text-purple">⭐ <%= totalStars.toLocaleString() %></div>
+        <div class="card-sub">Last <%= days %> days</div>
+      </div>
+      <div class="card">
+        <div class="card-title">Total Payments</div>
+        <div class="card-value"><%= totalPayments.toLocaleString() %></div>
+        <div class="card-sub">Completed transactions</div>
+      </div>
+      <div class="card">
+        <div class="card-title">Active Subscriptions</div>
+        <div class="card-value text-green"><%= activeSubs.toLocaleString() %></div>
+        <div class="card-sub">Currently premium</div>
+      </div>
+    </div>
+
+    <!-- Recent payments table -->
+    <div class="card">
+      <div class="card-title" style="margin-bottom:16px;">Recent Payments</div>
+      <table>
+        <thead>
+          <tr><th>User</th><th>Plan</th><th>Stars</th><th>Charge ID</th><th>Date</th></tr>
+        </thead>
+        <tbody>
+          <% recentPayments.forEach(p => { %>
+            <tr>
+              <td>
+                <% if (p.userId) { %>
+                  <%= p.userId.firstName || '' %>
+                  <span class="text-muted">(ID: <%= p.telegramId %>)</span>
+                <% } else { %>
+                  <span class="text-muted"><%= p.telegramId %></span>
+                <% } %>
+              </td>
+              <td><span class="badge badge-premium"><%= p.planType %></span></td>
+              <td class="text-purple">⭐ <%= p.starsAmount %></td>
+              <td class="text-muted" style="font-size:11px;">
+                <%= p.telegramChargeId ? p.telegramChargeId.slice(0,20) + '…' : '—' %>
+              </td>
+              <td class="text-muted">
+                <%= p.completedAt ? new Date(p.completedAt).toLocaleDateString() : '—' %>
+              </td>
+            </tr>
+          <% }) %>
+          <% if (recentPayments.length === 0) { %>
+            <tr><td colspan="5" class="text-muted" style="text-align:center; padding:32px;">No payments yet.</td></tr>
+          <% } %>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Daily breakdown -->
+    <div class="card">
+      <div class="card-title" style="margin-bottom:16px;">Daily Breakdown</div>
+      <table>
+        <thead><tr><th>Date</th><th>Stars</th><th>Weekly Subs</th><th>Monthly Subs</th><th>Expired</th></tr></thead>
+        <tbody>
+          <% analytics.slice().reverse().forEach(day => { %>
+            <tr>
+              <td><%= day.date %></td>
+              <td class="text-purple">⭐ <%= day.totalStarsEarned || 0 %></td>
+              <td><%= day.weeklySubscriptionsSold || 0 %></td>
+              <td><%= day.monthlySubscriptionsSold || 0 %></td>
+              <td class="text-muted"><%= day.subscriptionsExpired || 0 %></td>
+            </tr>
+          <% }) %>
+          <% if (analytics.length === 0) { %>
+            <tr><td colspan="5" class="text-muted" style="text-align:center; padding:32px;">No data yet.</td></tr>
+          <% } %>
+        </tbody>
+      </table>
+    </div>
+  </main>
+</div>
+</body></html>

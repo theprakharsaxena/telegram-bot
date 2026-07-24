@@ -1,0 +1,205 @@
+<%- include('../partials/head', { title: 'Settings' }) %>
+<div class="layout">
+  <%- include('../partials/sidebar') %>
+  <main class="main">
+    <div class="page-header">
+      <h1>Settings</h1>
+      <p>Runtime configuration — changes apply immediately without restart</p>
+    </div>
+
+    <div id="toast" style="display:none; position:fixed; top:24px; right:24px;
+         background:#1a1a2e; border:1px solid #2d2d44; padding:12px 20px;
+         border-radius:8px; font-size:14px; z-index:9999;"></div>
+
+    <form id="settingsForm">
+
+      <!-- Feature Flags -->
+      <div class="card">
+        <div class="card-title" style="margin-bottom:16px;">Feature Flags</div>
+        <div class="grid-2">
+          <div class="form-group">
+            <label>Maintenance Mode</label>
+            <select name="maintenanceMode">
+              <option value="false" <%= !settings.maintenanceMode ? 'selected' : '' %>>Off</option>
+              <option value="true"  <%= settings.maintenanceMode  ? 'selected' : '' %>>On — block all users</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Image Generation</label>
+            <select name="imageGenerationEnabled">
+              <option value="true"  <%= settings.imageGenerationEnabled !== false ? 'selected' : '' %>>Enabled</option>
+              <option value="false" <%= settings.imageGenerationEnabled === false  ? 'selected' : '' %>>Disabled</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Memory System</label>
+            <select name="memoryEnabled">
+              <option value="true"  <%= settings.memoryEnabled !== false ? 'selected' : '' %>>Enabled</option>
+              <option value="false" <%= settings.memoryEnabled === false  ? 'selected' : '' %>>Disabled</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>New User Registration</label>
+            <select name="newUsersEnabled">
+              <option value="true"  <%= settings.newUsersEnabled !== false ? 'selected' : '' %>>Enabled</option>
+              <option value="false" <%= settings.newUsersEnabled === false  ? 'selected' : '' %>>Disabled</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Maintenance Message</label>
+          <textarea name="maintenanceMessage" rows="2"><%= settings.maintenanceMessage || '' %></textarea>
+        </div>
+      </div>
+
+      <!-- Plan Limits -->
+      <div class="card">
+        <div class="card-title" style="margin-bottom:16px;">Plan Limits</div>
+        <div class="grid-2">
+          <div>
+            <p style="color:#64748b; font-size:12px; margin-bottom:12px;">FREE PLAN</p>
+            <div class="form-group">
+              <label>Daily Messages</label>
+              <input type="number" name="freeDailyMessages" value="<%= settings.freeLimits?.dailyMessages ?? envConfig.freeDailyMessages %>" min="1">
+            </div>
+            <div class="form-group">
+              <label>Daily Images</label>
+              <input type="number" name="freeDailyImages" value="<%= settings.freeLimits?.dailyImages ?? envConfig.freeDailyImages %>" min="0">
+            </div>
+            <div class="form-group">
+              <label>Memory Limit</label>
+              <input type="number" name="freeMemoryLimit" value="<%= settings.freeLimits?.memoryLimit || 20 %>" min="0">
+            </div>
+          </div>
+          <div>
+            <p style="color:#a78bfa; font-size:12px; margin-bottom:12px;">PREMIUM PLAN</p>
+            <div class="form-group">
+              <label>Daily Messages</label>
+              <input type="number" name="premiumDailyMessages" value="<%= settings.premiumLimits?.dailyMessages ?? envConfig.premiumDailyMessages %>" min="1">
+            </div>
+            <div class="form-group">
+              <label>Daily Images</label>
+              <input type="number" name="premiumDailyImages" value="<%= settings.premiumLimits?.dailyImages ?? envConfig.premiumDailyImages %>" min="0">
+            </div>
+            <div class="form-group">
+              <label>Memory Limit</label>
+              <input type="number" name="premiumMemoryLimit" value="<%= settings.premiumLimits?.memoryLimit || 200 %>" min="0">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Pricing -->
+      <div class="card">
+        <div class="card-title" style="margin-bottom:16px;">Telegram Stars Pricing</div>
+        <div class="grid-2">
+          <div class="form-group">
+            <label>Weekly Price (Stars)</label>
+            <input type="number" name="starsWeeklyPrice" value="<%= settings.starsWeeklyPrice %>" min="1">
+          </div>
+          <div class="form-group">
+            <label>Monthly Price (Stars)</label>
+            <input type="number" name="starsMonthlyPrice" value="<%= settings.starsMonthlyPrice %>" min="1">
+          </div>
+        </div>
+      </div>
+
+      <!-- AI Config -->
+      <div class="card">
+        <div class="card-title" style="margin-bottom:16px;">AI Configuration</div>
+        <div class="grid-2">
+          <div class="form-group">
+            <label>OpenAI Model</label>
+            <select name="aiModel">
+              <option value="gpt-4o"      <%= settings.aiModel === 'gpt-4o'      ? 'selected' : '' %>>gpt-4o</option>
+              <option value="gpt-4o-mini" <%= settings.aiModel === 'gpt-4o-mini' ? 'selected' : '' %>>gpt-4o-mini</option>
+              <option value="gpt-4-turbo" <%= settings.aiModel === 'gpt-4-turbo' ? 'selected' : '' %>>gpt-4-turbo</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Temperature (0–2)</label>
+            <input type="number" name="aiTemperature" value="<%= settings.aiTemperature %>" min="0" max="2" step="0.05">
+          </div>
+          <div class="form-group">
+            <label>Max Tokens</label>
+            <input type="number" name="aiMaxTokens" value="<%= settings.aiMaxTokens %>" min="100" max="4096">
+          </div>
+          <div class="form-group">
+            <label>Context Window Size (messages)</label>
+            <input type="number" name="contextWindowSize" value="<%= settings.contextWindowSize %>" min="5" max="50">
+          </div>
+          <div class="form-group">
+            <label>Summarisation Threshold (messages)</label>
+            <input type="number" name="summaryThreshold" value="<%= settings.summaryThreshold %>" min="10" max="100">
+          </div>
+        </div>
+      </div>
+
+      <button type="submit" class="btn btn-primary" style="min-width:160px;">
+        Save All Settings
+      </button>
+    </form>
+
+    <!-- Broadcast -->
+    <div class="card mt-16">
+      <div class="card-title" style="margin-bottom:16px;">Broadcast Message</div>
+      <div class="form-group">
+        <label>Message (HTML supported)</label>
+        <textarea id="broadcastMsg" rows="3" placeholder="Enter your message…"></textarea>
+      </div>
+      <div class="form-group">
+        <label>Send to</label>
+        <select id="broadcastFilter">
+          <option value="">All users</option>
+          <option value="free">Free users only</option>
+          <option value="premium">Premium users only</option>
+        </select>
+      </div>
+      <button class="btn btn-primary" onclick="sendBroadcast()">Send Broadcast</button>
+      <span id="broadcastResult" style="margin-left:12px; font-size:13px; color:#64748b;"></span>
+    </div>
+  </main>
+</div>
+
+<script>
+document.getElementById('settingsForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const data = Object.fromEntries(new FormData(e.target));
+  try {
+    const res = await fetch('/admin/settings', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    });
+    const result = await res.json();
+    showToast(result.message || 'Saved', result.status === 'ok');
+  } catch (err) {
+    showToast('Save failed', false);
+  }
+});
+
+async function sendBroadcast() {
+  const message = document.getElementById('broadcastMsg').value.trim();
+  const planFilter = document.getElementById('broadcastFilter').value;
+  if (!message) return alert('Enter a message first.');
+  if (!confirm('Send this broadcast?')) return;
+  const res = await fetch('/admin/broadcast', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ message, planFilter }),
+  });
+  const data = await res.json();
+  document.getElementById('broadcastResult').textContent =
+    `Sent: ${data.sent}, Failed: ${data.failed}, Total: ${data.total}`;
+}
+
+function showToast(msg, ok) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.style.display = 'block';
+  t.style.borderColor = ok ? '#059669' : '#dc2626';
+  t.style.color = ok ? '#34d399' : '#f87171';
+  setTimeout(() => { t.style.display = 'none'; }, 3000);
+}
+</script>
+</body></html>
