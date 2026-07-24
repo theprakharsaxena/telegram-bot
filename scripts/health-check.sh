@@ -1,4 +1,10 @@
 #!/usr/bin/env bash
+# Load environment variables from .env
+if [ -f "$(dirname "$0")/../.env" ]; then
+    set -a
+    source "$(dirname "$0")/../.env"
+    set +a
+fi
 # =============================================================================
 # health-check.sh — Production health verification script
 # Run on the EC2 server to verify all components are healthy.
