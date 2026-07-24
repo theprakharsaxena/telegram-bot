@@ -15,7 +15,7 @@
     "lint:fix": "eslint src/ --ext .js --fix"
   },
   "dependencies": {
-    "@sentry/node": "^8.19.0",
+    "@sentry/node": "^8.55.2",
     "axios": "^1.7.2",
     "bullmq": "^5.7.14",
     "compression": "^1.7.4",
