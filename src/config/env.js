@@ -36,11 +36,13 @@ const envSchema = Joi.object({
   TELEGRAM_WEBHOOK_SECRET: Joi.string().min(16).required(),
   TELEGRAM_WEBHOOK_URL: Joi.string().uri().required(),
 
-  // ── OpenAI ────────────────────────────────────────────────────────────────
-  OPENAI_API_KEY: Joi.string().required(),
-  OPENAI_MODEL: Joi.string().default('gpt-4o'),
-  OPENAI_MAX_TOKENS: Joi.number().integer().default(1024),
-  OPENAI_TEMPERATURE: Joi.number().min(0).max(2).default(0.85),
+  // ── Novita AI (Chat) ──────────────────────────────────────────────────────
+  // Novita uses the OpenAI-compatible API — same SDK, different baseURL + model
+  NOVITA_API_KEY: Joi.string().required(),
+  NOVITA_BASE_URL: Joi.string().uri().default('https://api.novita.ai/openai'),
+  NOVITA_MODEL: Joi.string().default('meta-llama/llama-3.1-8b-instruct'),
+  NOVITA_MAX_TOKENS: Joi.number().integer().default(2048),
+  NOVITA_TEMPERATURE: Joi.number().min(0).max(2).default(1),
 
   // ── Replicate (Image Generation) ──────────────────────────────────────────
   REPLICATE_API_TOKEN: Joi.string().required(),
@@ -129,10 +131,12 @@ const config = {
   },
 
   openai: {
-    apiKey: envVars.OPENAI_API_KEY,
-    model: envVars.OPENAI_MODEL,
-    maxTokens: envVars.OPENAI_MAX_TOKENS,
-    temperature: envVars.OPENAI_TEMPERATURE,
+    // Kept as alias so AdminSettings aiModel field still works
+    apiKey:      envVars.NOVITA_API_KEY,
+    baseURL:     envVars.NOVITA_BASE_URL,
+    model:       envVars.NOVITA_MODEL,
+    maxTokens:   envVars.NOVITA_MAX_TOKENS,
+    temperature: envVars.NOVITA_TEMPERATURE,
   },
 
   replicate: {

@@ -31,12 +31,16 @@ const {
 } = require('./promptBuilder');
 
 // ---------------------------------------------------------------------------
-// Singleton OpenAI client
+// Singleton client — OpenAI SDK pointed at Novita's OpenAI-compatible endpoint
 // ---------------------------------------------------------------------------
-const openai = new OpenAI({ apiKey: config.openai.apiKey });
+const openai = new OpenAI({
+  apiKey:  config.openai.apiKey,
+  baseURL: config.openai.baseURL, // https://api.novita.ai/openai
+});
 
-// Model for cheap utility calls (summarisation, memory extraction)
-const UTILITY_MODEL = 'gpt-4o-mini';
+// Utility model for summarisation + memory extraction.
+// Llama 3.1 8B is fast and cheap for these tasks.
+const UTILITY_MODEL = 'meta-llama/llama-3.1-8b-instruct';
 
 // ---------------------------------------------------------------------------
 // Chat completion
@@ -89,7 +93,7 @@ async function generateChatResponse({
   const temperature = settings?.aiTemperature || config.openai.temperature;
 
   try {
-    logger.info('OpenAI chat request', {
+    logger.info('Novita AI chat request', {
       telegramId: user.telegramId,
       model,
       messageCount: messages.length,
@@ -99,24 +103,24 @@ async function generateChatResponse({
     const response = await openai.chat.completions.create({
       model,
       messages,
-      max_tokens:  maxTokens,
+      max_tokens:        maxTokens,
       temperature,
-      // Prevent the model from refusing roleplay by not over-constraining
-      presence_penalty:  0.6,  // encourage varied responses
-      frequency_penalty: 0.3,  // reduce repetitive phrases
+      presence_penalty:  0.6,
+      frequency_penalty: 0.3,
+      top_p:             1,
     });
 
     const choice     = response.choices[0];
     const content    = choice.message.content?.trim() || '';
     const tokenUsage = {
-      promptTokens:     response.usage.prompt_tokens,
-      completionTokens: response.usage.completion_tokens,
-      totalTokens:      response.usage.total_tokens,
+      promptTokens:     response.usage?.prompt_tokens     || 0,
+      completionTokens: response.usage?.completion_tokens || 0,
+      totalTokens:      response.usage?.total_tokens      || 0,
     };
 
-    logger.info('OpenAI chat response', {
-      telegramId: user.telegramId,
-      tokens: tokenUsage.totalTokens,
+    logger.info('Novita AI chat response', {
+      telegramId:  user.telegramId,
+      tokens:      tokenUsage.totalTokens,
       finishReason: choice.finish_reason,
     });
 
@@ -179,13 +183,17 @@ async function extractMemories(messages, displayName) {
       messages: [{ role: 'user', content: prompt }],
       max_tokens: 500,
       temperature: 0.1, // very low — we want deterministic extraction
-      response_format: { type: 'json_object' },
+      // Note: response_format json_object not used — model is instructed
+      // to return JSON via the prompt itself, which works across all models
     });
 
-    const raw  = response.choices[0].message.content?.trim() || '[]';
+    const raw = response.choices[0].message.content?.trim() || '[]';
+
+    // Strip markdown code fences if model wraps JSON in ```json ... ```
+    const cleaned = raw.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/, '').trim();
 
     // The model may return { memories: [...] } or just [...] — handle both
-    let parsed = JSON.parse(raw);
+    let parsed = JSON.parse(cleaned);
     if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
       parsed = parsed.memories || parsed.facts || Object.values(parsed)[0] || [];
     }

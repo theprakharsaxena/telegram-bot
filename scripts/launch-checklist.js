@@ -52,12 +52,12 @@ async function run() {
   // Check no placeholder values remain
   const placeholders = ['FILL_IN', 'YOUR_', 'REPLACE_ME', 'xxx', 'placeholder'];
   const envChecks = {
-    'TELEGRAM_BOT_TOKEN':    config.telegram.token,
-    'OPENAI_API_KEY':        config.openai.apiKey,
-    'REPLICATE_API_TOKEN':   config.replicate.apiToken,
-    'ADMIN_SECRET_KEY':      config.admin.secretKey,
-    'ADMIN_PASSWORD':        config.admin.password,
-    'SESSION_SECRET':        config.session.secret,
+    'TELEGRAM_BOT_TOKEN':      config.telegram.token,
+    'NOVITA_API_KEY':          config.openai.apiKey,
+    'REPLICATE_API_TOKEN':     config.replicate.apiToken,
+    'ADMIN_SECRET_KEY':        config.admin.secretKey,
+    'ADMIN_PASSWORD':          config.admin.password,
+    'SESSION_SECRET':          config.session.secret,
     'TELEGRAM_WEBHOOK_SECRET': config.telegram.webhookSecret,
   };
 

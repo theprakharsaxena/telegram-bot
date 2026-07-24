@@ -67,7 +67,7 @@ const updateSettingsSchema = Joi.object({
   premiumMemoryLimit:     Joi.number().integer().min(0).max(10000),
   starsWeeklyPrice:       Joi.number().integer().min(1).max(100000),
   starsMonthlyPrice:      Joi.number().integer().min(1).max(100000),
-  aiModel:                Joi.string().valid('gpt-4o', 'gpt-4o-mini', 'gpt-4-turbo'),
+  aiModel:                Joi.string().max(128), // allow any Novita model string
   aiTemperature:          Joi.number().min(0).max(2),
   aiMaxTokens:            Joi.number().integer().min(100).max(4096),
   contextWindowSize:      Joi.number().integer().min(5).max(50),

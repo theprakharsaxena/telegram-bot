@@ -121,9 +121,9 @@ const adminSettingsSchema = new mongoose.Schema(
     },
 
     // ── AI configuration ──────────────────────────────────────────────────
-    aiModel: { type: String, default: config.openai.model, maxlength: 64 },
-    aiTemperature: { type: Number, default: config.openai.temperature, min: 0, max: 2 },
-    aiMaxTokens: { type: Number, default: config.openai.maxTokens, min: 1 },
+    aiModel: { type: String, default: 'meta-llama/llama-3.1-8b-instruct', maxlength: 128 },
+    aiTemperature: { type: Number, default: 1, min: 0, max: 2 },
+    aiMaxTokens: { type: Number, default: 2048, min: 1 },
     // Number of messages before conversation gets summarised
     summaryThreshold: { type: Number, default: 40, min: 10 },
     // Number of recent messages included in context window

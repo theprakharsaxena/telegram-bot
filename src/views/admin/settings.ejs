@@ -109,11 +109,13 @@
         <div class="card-title" style="margin-bottom:16px;">AI Configuration</div>
         <div class="grid-2">
           <div class="form-group">
-            <label>OpenAI Model</label>
+            <label>AI Model</label>
             <select name="aiModel">
-              <option value="gpt-4o"      <%= settings.aiModel === 'gpt-4o'      ? 'selected' : '' %>>gpt-4o</option>
-              <option value="gpt-4o-mini" <%= settings.aiModel === 'gpt-4o-mini' ? 'selected' : '' %>>gpt-4o-mini</option>
-              <option value="gpt-4-turbo" <%= settings.aiModel === 'gpt-4-turbo' ? 'selected' : '' %>>gpt-4-turbo</option>
+              <option value="meta-llama/llama-3.1-8b-instruct"   <%= settings.aiModel === 'meta-llama/llama-3.1-8b-instruct'   ? 'selected' : '' %>>Llama 3.1 8B (fast, cost-effective)</option>
+              <option value="meta-llama/llama-3.1-70b-instruct"  <%= settings.aiModel === 'meta-llama/llama-3.1-70b-instruct'  ? 'selected' : '' %>>Llama 3.1 70B (smarter, slower)</option>
+              <option value="meta-llama/llama-3.1-405b-instruct" <%= settings.aiModel === 'meta-llama/llama-3.1-405b-instruct' ? 'selected' : '' %>>Llama 3.1 405B (best quality)</option>
+              <option value="meta-llama/llama-3.2-3b-instruct"   <%= settings.aiModel === 'meta-llama/llama-3.2-3b-instruct'   ? 'selected' : '' %>>Llama 3.2 3B (cheapest)</option>
+              <option value="mistralai/mistral-7b-instruct"      <%= settings.aiModel === 'mistralai/mistral-7b-instruct'      ? 'selected' : '' %>>Mistral 7B</option>
             </select>
           </div>
           <div class="form-group">

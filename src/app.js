@@ -23,29 +23,11 @@
  *  13. Global error handler
  */
 
-const express     = require('express');
-const helmet      = require('helmet');
-const cors        = require('cors');
-const morgan      = require('morgan');
-const compression = require('compression');
-const cookieParser = require('cookie-parser');
-const path        = require('path');
 const Sentry      = require('@sentry/node');
-
-const config        = require('./config/env');
-const logger        = require('./utils/logger');
-const notFound      = require('./middleware/notFound');
-const errorHandler  = require('./middleware/errorHandler');
-const healthRouter  = require('./routes/health');
-
-const app = express();
+const config      = require('./config/env');
 
 // ---------------------------------------------------------------------------
-// 1. Sentry
-// @sentry/node v8 removed autoDiscoverNodePerformanceMonitoringIntegrations
-// and Handlers.requestHandler/tracingHandler/errorHandler.
-// The v8 API uses Sentry.setupExpressErrorHandler() instead.
-// We guard against both API versions for compatibility.
+// Sentry MUST be initialised before express is imported to instrument it
 // ---------------------------------------------------------------------------
 if (config.sentry.dsn) {
   try {
@@ -54,19 +36,40 @@ if (config.sentry.dsn) {
       environment:      config.env,
       tracesSampleRate: config.isProduction ? 0.1 : 1.0,
     });
+  } catch (_) {
+    // Never crash on Sentry init failure
+  }
+}
 
-    // v7 API: requestHandler + tracingHandler (may not exist in v8)
+const express     = require('express');
+const helmet      = require('helmet');
+const cors        = require('cors');
+const morgan      = require('morgan');
+const compression = require('compression');
+const cookieParser = require('cookie-parser');
+const path        = require('path');
+
+const logger        = require('./utils/logger');
+const notFound      = require('./middleware/notFound');
+const errorHandler  = require('./middleware/errorHandler');
+const healthRouter  = require('./routes/health');
+
+const app = express();
+
+// ---------------------------------------------------------------------------
+// 1. Sentry request/tracing handlers (after express is created)
+// ---------------------------------------------------------------------------
+if (config.sentry.dsn) {
+  try {
     if (typeof Sentry.Handlers?.requestHandler === 'function') {
       app.use(Sentry.Handlers.requestHandler());
     }
     if (typeof Sentry.Handlers?.tracingHandler === 'function') {
       app.use(Sentry.Handlers.tracingHandler());
     }
-
     logger.info('Sentry initialised');
   } catch (sentryErr) {
-    // Never let Sentry initialisation crash the app
-    logger.warn('Sentry initialisation failed — continuing without it', {
+    logger.warn('Sentry handler setup failed — continuing without it', {
       error: sentryErr.message,
     });
   }
