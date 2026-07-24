@@ -96,6 +96,14 @@ module.exports = function errorHandler(err, req, res, next) {
 
   if (err.statusCode >= 500) {
     logger.error(err.message, { ...logPayload, stack: err.stack, meta: err.meta });
+
+    // Capture 5xx errors in Sentry with request context
+    const { captureError } = require('../utils/sentryHelper');
+    captureError(err, {
+      method:     req.method,
+      url:        req.originalUrl,
+      statusCode: err.statusCode,
+    });
   } else {
     logger.warn(err.message, logPayload);
   }

@@ -205,11 +205,18 @@ async function extractMemories(messages, displayName) {
  * Classify OpenAI errors and throw appropriate AppErrors.
  */
 function handleOpenAIError(err, context) {
+  const { captureError } = require('../../utils/sentryHelper');
+
   logger.error(`OpenAI error in ${context}`, {
     status: err.status,
     code:   err.code,
     error:  err.message,
   });
+
+  // Only capture unexpected errors in Sentry — not rate limits or content filters
+  if (err.status !== 429 && err.status !== 400) {
+    captureError(err, { context, status: err.status, code: err.code });
+  }
 
   if (err.status === 429) {
     throw new AppError(

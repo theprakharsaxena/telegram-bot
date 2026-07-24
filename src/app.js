@@ -42,19 +42,34 @@ const app = express();
 
 // ---------------------------------------------------------------------------
 // 1. Sentry
+// @sentry/node v8 removed autoDiscoverNodePerformanceMonitoringIntegrations
+// and Handlers.requestHandler/tracingHandler/errorHandler.
+// The v8 API uses Sentry.setupExpressErrorHandler() instead.
+// We guard against both API versions for compatibility.
 // ---------------------------------------------------------------------------
 if (config.sentry.dsn) {
-  Sentry.init({
-    dsn:              config.sentry.dsn,
-    environment:      config.env,
-    tracesSampleRate: config.isProduction ? 0.1 : 1.0,
-    integrations: [
-      ...Sentry.autoDiscoverNodePerformanceMonitoringIntegrations(),
-    ],
-  });
-  app.use(Sentry.Handlers.requestHandler());
-  app.use(Sentry.Handlers.tracingHandler());
-  logger.info('Sentry initialised');
+  try {
+    Sentry.init({
+      dsn:              config.sentry.dsn,
+      environment:      config.env,
+      tracesSampleRate: config.isProduction ? 0.1 : 1.0,
+    });
+
+    // v7 API: requestHandler + tracingHandler (may not exist in v8)
+    if (typeof Sentry.Handlers?.requestHandler === 'function') {
+      app.use(Sentry.Handlers.requestHandler());
+    }
+    if (typeof Sentry.Handlers?.tracingHandler === 'function') {
+      app.use(Sentry.Handlers.tracingHandler());
+    }
+
+    logger.info('Sentry initialised');
+  } catch (sentryErr) {
+    // Never let Sentry initialisation crash the app
+    logger.warn('Sentry initialisation failed — continuing without it', {
+      error: sentryErr.message,
+    });
+  }
 }
 
 // ---------------------------------------------------------------------------
@@ -135,7 +150,13 @@ app.use('/admin', adminRouter);
 // 11. Sentry error handler
 // ---------------------------------------------------------------------------
 if (config.sentry.dsn) {
-  app.use(Sentry.Handlers.errorHandler());
+  // v8 API
+  if (typeof Sentry.setupExpressErrorHandler === 'function') {
+    Sentry.setupExpressErrorHandler(app);
+  // v7 API
+  } else if (typeof Sentry.Handlers?.errorHandler === 'function') {
+    app.use(Sentry.Handlers.errorHandler());
+  }
 }
 
 // ---------------------------------------------------------------------------
