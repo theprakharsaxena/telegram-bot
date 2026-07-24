@@ -23,6 +23,12 @@ const express         = require('express');
 const { requireAdminAuth, createSession, destroySession } = require('../middleware/adminAuth');
 const { adminLimiter } = require('../middleware/rateLimiter');
 const adminController = require('../controllers/adminController');
+const {
+  validateBanUser,
+  validateUnbanUser,
+  validateUpdateSettings,
+  validateBroadcast,
+} = require('../validators/adminValidators');
 const config          = require('../config/env');
 
 const router = express.Router();
@@ -76,11 +82,11 @@ router.use(requireAdminAuth);
 
 router.get('/',          adminController.getOverview);
 router.get('/users',     adminController.getUsers);
-router.post('/users/ban',   adminController.banUser);
-router.post('/users/unban', adminController.unbanUser);
+router.post('/users/ban',   validateBanUser,    adminController.banUser);
+router.post('/users/unban', validateUnbanUser,  adminController.unbanUser);
 router.get('/revenue',   adminController.getRevenue);
 router.get('/settings',  adminController.getSettings);
-router.post('/settings', adminController.updateSettings);
-router.post('/broadcast', adminController.broadcastMessage);
+router.post('/settings', validateUpdateSettings, adminController.updateSettings);
+router.post('/broadcast', validateBroadcast, adminController.broadcastMessage);
 
 module.exports = router;

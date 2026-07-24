@@ -34,6 +34,8 @@ const userService                     = require('../../services/userService');
 const usageService                    = require('../../services/usage/usageService');
 const { createPendingImageRecord }    = require('../../services/image/imageService');
 const { queueImageGeneration }        = require('../../jobs/imageQueue');
+const { sanitiseUserMessage,
+        sanitiseAiResponse }          = require('../../utils/sanitizer');
 const { redisClient }                 = require('../../config/redis');
 const logger                          = require('../../utils/logger');
 const config                          = require('../../config/env');
@@ -150,6 +152,18 @@ async function handleChatMessage(msg) {
     return;
   }
 
+  // ── Prompt injection sanitisation ────────────────────────────────────────
+  const { sanitised, wasModified, flags } = sanitiseUserMessage(text);
+  if (flags.includes('injection_detected')) {
+    logger.warn('Prompt injection attempt detected', {
+      telegramId: user.telegramId,
+      flags,
+      original: text.slice(0, 100),
+    });
+  }
+  // Use sanitised text for AI — original text for display/storage
+  const aiText = sanitised || text;
+
   // ── Per-user processing lock ─────────────────────────────────────────────
   const lockKey      = PROCESSING_LOCK_PREFIX + user.telegramId;
   const lockAcquired = await redisClient.set(lockKey, '1', 'EX', PROCESSING_LOCK_TTL, 'NX');
@@ -221,7 +235,7 @@ async function handleChatMessage(msg) {
       user._id,
       user.telegramId,
       {
-        content:           text,
+        content:           text,        // store original text
         personality:       personalityKey,
         telegramMessageId: msg.message_id,
       }
@@ -234,15 +248,18 @@ async function handleChatMessage(msg) {
     );
 
     // ── 9. Generate AI response ───────────────────────────────────────
-    const { content: aiResponse, tokenUsage, model } = await aiService.generateChatResponse({
+    const { content: rawAiResponse, tokenUsage, model } = await aiService.generateChatResponse({
       personality,
       user,
       contextMessages,
-      userMessage:  text,
+      userMessage:  aiText,             // send sanitised text to OpenAI
       summary:      conversation.summary,
       settings,
       memoryLimit,
     });
+
+    // Sanitise AI response before sending to Telegram
+    const aiResponse = sanitiseAiResponse(rawAiResponse);
 
     // ── 10. Send response to Telegram ─────────────────────────────────
     const sentMessage = await sendMessage(chatId, aiResponse);
