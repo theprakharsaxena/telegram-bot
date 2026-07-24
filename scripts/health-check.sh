@@ -105,10 +105,20 @@ fi
 # ---------------------------------------------------------------------------
 echo ""
 echo "→ Redis:"
-if command -v redis-cli &>/dev/null; then
-    # Try without password first, then with
-    REDIS_PING=$(redis-cli ping 2>/dev/null || redis-cli -a "${REDIS_PASSWORD:-}" ping 2>/dev/null || echo "failed")
-    [ "${REDIS_PING}" = "PONG" ] && ok "Redis PING → PONG" || fail "Redis not responding"
+
+if command -v redis-cli >/dev/null 2>&1; then
+    if [ -n "${REDIS_PASSWORD:-}" ]; then
+        REDIS_PING=$(redis-cli -a "$REDIS_PASSWORD" ping 2>/dev/null)
+    else
+        REDIS_PING=$(redis-cli ping 2>/dev/null)
+    fi
+
+    if [ "$REDIS_PING" = "PONG" ]; then
+        ok "Redis PING → PONG"
+    else
+        fail "Redis not responding"
+        info "Redis replied: $REDIS_PING"
+    fi
 else
     info "redis-cli not found, skipping direct check"
 fi
