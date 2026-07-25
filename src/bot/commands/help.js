@@ -17,42 +17,42 @@ async function helpCommand(msg) {
   const planBadge = isPremium ? '⭐ Premium' : '🆓 Free';
 
   const text =
-    `📖 <b>${config.bot.name} — Help Guide</b>\n` +
-    `Your current plan: <b>${planBadge}</b>\n\n` +
+    `📖 <b>${config.bot.name} — VIP Companion Guide</b>\n` +
+    `Your current status: <b>${planBadge}</b>\n\n` +
 
-    `<b>💬 Chatting</b>\n` +
-    `Just send me any message and I'll respond! I remember our conversations and learn about you over time.\n\n` +
+    `<b>💬 Chatting & Roleplay</b> 💋\n` +
+    `Just send me any message to start talking! I remember our conversations and learn about your desires over time.\n\n` +
 
-    `<b>🖼️ Images</b>\n` +
-    `Ask me to generate an image naturally:\n` +
+    `<b>🖼️ Uncensored Images</b> 🔞\n` +
+    `Ask me to generate a hot photo of myself naturally:\n` +
     `<i>"Send me a selfie"</i>\n` +
-    `<i>"Show us at the beach"</i>\n` +
-    `<i>"Generate a photo of you in Paris"</i>\n\n` +
+    `<i>"Show me your boobs"</i>\n` +
+    `<i>"Imagine you in hot lingerie"</i>\n\n` +
 
-    `<b>📋 Commands</b>\n` +
-    `/start — Restart and see the welcome message\n` +
-    `/help — Show this guide\n` +
-    `/profile — View your profile & usage stats\n` +
-    `/girlfriends — Switch My Girlfriend\n` +
-    `/premium — View & manage premium subscription\n` +
-    `/memory — See and manage what I remember about you\n` +
-    `/reset — Clear conversation history (fresh start)\n` +
-    `/images — Browse your generated image history\n` +
-    `/usage — Check today's message & image usage\n` +
-    `/settings — Adjust your preferences\n\n` +
+    `<b>📋 VIP Commands</b> ⚙️\n` +
+    `/start — 👋 Welcome greeting & hot examples\n` +
+    `/help — ❓ Show this help guide\n` +
+    `/profile — 👤 View your profile & stats\n` +
+    `/girlfriends — 👙 Switch my active hot girlfriend\n` +
+    `/premium — ⭐ Unlock unlimited uncensored pics & chat\n` +
+    `/memory — 🧠 Manage what she remembers about you\n` +
+    `/reset — 🔄 Clear chat & start a new roleplay\n` +
+    `/images — 🖼️ Browse your generated hot photos history\n` +
+    `/usage — 📊 Check today's message & image usage\n` +
+    `/settings — ⚙️ Toggle Direct Image Mode & preferences\n\n` +
 
-    `<b>📊 Your Daily Limits</b>\n` +
+    `<b>📊 Your Limits Today</b>\n` +
     (isPremium
-      ? `💬 Unlimited chat\n` +
-        `🖼️ ${config.limits.premium.dailyImages} images\n` +
+      ? `💬 Unlimited chat & roleplay\n` +
+        `🖼️ ${config.limits.premium.dailyImages} uncensored 🔞 images\n` +
         `🧠 ${config.limits.premium.memoryLimit} memories stored\n`
       : `💬 ${config.limits.free.dailyMessages} messages\n` +
         `🖼️ ${config.limits.free.dailyImages} images\n` +
         `🧠 ${config.limits.free.memoryLimit} memories stored\n`) +
     `\n` +
     (!isPremium
-      ? `⭐ <b>Upgrade to Premium</b> for unlimited chats, more images, and exclusive personalities → /premium\n`
-      : `✨ You're on Premium — enjoy the full experience!\n`);
+      ? `⭐ <b>Upgrade to VIP Premium Pass</b> for unlimited chats, 30 uncensored 🔞 images per day, and all hot exclusive girlfriends → /premium\n`
+      : `✨ You're on Premium — enjoy the uncensored roleplay experience! 💋\n`);
 
   const keyboard = {
     inline_keyboard: [

@@ -257,16 +257,16 @@ async function deleteMessage(chatId, messageId) {
 async function setBotCommands() {
   const bot = getBot();
   const commands = [
-    { command: 'start',       description: '👋 Start or restart the bot' },
-    { command: 'help',        description: '❓ Show help and commands' },
-    { command: 'profile',     description: '👤 View your profile & stats' },
-    { command: 'girlfriends', description: '✨ Switch My Girlfriend' },
-    { command: 'premium',     description: '⭐ View premium plans' },
-    { command: 'memory',      description: '🧠 Manage what I remember' },
-    { command: 'reset',       description: '🔄 Reset conversation history' },
-    { command: 'images',      description: '🖼️ View your image history' },
-    { command: 'usage',       description: '📊 Check your daily usage' },
-    { command: 'settings',    description: '⚙️ Adjust your preferences' },
+    { command: 'start',       description: '👋 Start chat & roleplay with AI GF' },
+    { command: 'help',        description: '❓ How to chat & request uncensored pics' },
+    { command: 'profile',     description: '👤 View your VIP profile status' },
+    { command: 'girlfriends', description: '👙 Switch my active hot girlfriend' },
+    { command: 'premium',     description: '⭐ Get premium pass for uncensored content 🔞' },
+    { command: 'memory',      description: '🧠 Manage what she remembers about you' },
+    { command: 'reset',       description: '🔄 Clear chat & start a new roleplay' },
+    { command: 'images',      description: '🖼️ View your generated hot photos history' },
+    { command: 'usage',       description: '📊 Check your daily message & image limits' },
+    { command: 'settings',    description: '⚙️ Toggle Direct Image Mode & settings' },
   ];
 
   try {
