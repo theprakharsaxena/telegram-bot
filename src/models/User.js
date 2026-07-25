@@ -38,6 +38,8 @@ const preferencesSchema = new mongoose.Schema(
       enum: ['casual', 'romantic', 'friendly', 'professional'],
       default: 'casual',
     },
+    // Direct Image Mode: treats any incoming text as an image prompt
+    directImageMode: { type: Boolean, default: false },
   },
   { _id: false } // embedded — no separate _id needed
 );

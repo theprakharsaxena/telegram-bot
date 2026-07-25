@@ -204,7 +204,8 @@ async function handleChatMessage(msg) {
     }
 
     // ── 3. Detect image request ─────────────────────────────────────────
-    const { isImageRequest } = detectImageRequest(text);
+    // If user has directImageMode preference enabled, treat any incoming text as an image request
+    const isImageRequest = user.preferences?.directImageMode || detectImageRequest(text).isImageRequest;
 
     // ── 4. Get active personality ───────────────────────────────────────
     const personalityKey = user.activePersonality || 'sarah-23';

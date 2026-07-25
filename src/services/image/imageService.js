@@ -98,7 +98,7 @@ async function generateImageWithFal(prompt, width = 1024, height = 1024) {
 
     return imageUrl;
   } catch (falError) {
-    logger.error("Fal.ai error:", falError);
+    logger.error("Fal.ai error", { error: falError.message });
     throw new Error("Fal AI image generation failed: " + falError.message);
   }
 }
@@ -149,7 +149,7 @@ async function generateImageWithRunware(prompt) {
       throw new Error("Invalid response format from Runware AI");
     }
   } catch (error) {
-    logger.error("Runware AI Error:", error);
+    logger.error("Runware AI Error", { error: error.message });
     throw error;
   }
 }

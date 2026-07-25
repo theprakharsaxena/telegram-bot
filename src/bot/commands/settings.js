@@ -29,7 +29,8 @@ function buildSettingsText(prefs) {
     `🗣 Response style: <b>${capitalize(prefs.responseStyle)}</b>\n` +
     `⌨️ Typing simulation: <b>${prefs.typingSimulation ? 'On' : 'Off'}</b>\n` +
     `🧠 Memory: <b>${prefs.memoryEnabled ? 'On' : 'Off'}</b>\n` +
-    `🔔 Notifications: <b>${prefs.notificationsEnabled ? 'On' : 'Off'}</b>`
+    `🔔 Notifications: <b>${prefs.notificationsEnabled ? 'On' : 'Off'}</b>\n` +
+    `🖼️ Direct Image Mode: <b>${prefs.directImageMode ? 'On' : 'Off'}</b>`
   );
 }
 
@@ -47,11 +48,13 @@ function buildSettingsKeyboard(prefs) {
       ],
       [
         {
-          text: `⌨️ Typing: ${prefs.typingSimulation ? '✅ On' : '❌ Off'}`,
+          text: `⌨️ Typing simulation: ${prefs.typingSimulation ? '✅ On' : '❌ Off'}`,
           callback_data: 'settings:toggle:typingSimulation',
         },
+      ],
+      [
         {
-          text: `🧠 Memory: ${prefs.memoryEnabled ? '✅ On' : '❌ Off'}`,
+          text: `🧠 Long-term memory: ${prefs.memoryEnabled ? '✅ On' : '❌ Off'}`,
           callback_data: 'settings:toggle:memoryEnabled',
         },
       ],
@@ -62,7 +65,15 @@ function buildSettingsKeyboard(prefs) {
         },
       ],
       [
+        {
+          text: `🖼️ Direct Image Mode: ${prefs.directImageMode ? '✅ On' : '❌ Off'}`,
+          callback_data: 'settings:toggle:directImageMode',
+        },
+      ],
+      [
         { text: '🗑️ Clear memories',     callback_data: 'settings:clear_memories_confirm' },
+      ],
+      [
         { text: '❌ Delete account',      callback_data: 'settings:delete_account_confirm' },
       ],
       [{ text: '← Back',                 callback_data: 'action:back' }],

@@ -61,6 +61,7 @@ async function updatePreferences(telegramId, updates) {
     'typingSimulation',
     'memoryEnabled',
     'responseStyle',
+    'directImageMode',
   ];
 
   const setFields = {};

@@ -37,7 +37,7 @@ async function handleSettingsCallback(action, query, ctx) {
   // ── Toggle boolean preferences ──────────────────────────────────────────
   if (action.startsWith('toggle:')) {
     const field = action.replace('toggle:', '');
-    const toggleable = ['typingSimulation', 'memoryEnabled', 'notificationsEnabled'];
+    const toggleable = ['typingSimulation', 'memoryEnabled', 'notificationsEnabled', 'directImageMode'];
 
     if (!toggleable.includes(field)) {
       return sendMessage(chatId, '❓ Unknown setting.');
