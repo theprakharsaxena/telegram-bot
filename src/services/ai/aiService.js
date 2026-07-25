@@ -88,7 +88,9 @@ async function generateChatResponse({
     { role: 'user', content: userMessage },
   ];
 
-  const model       = settings?.aiModel       || config.openai.model;
+  const model       = settings?.aiModel && !settings.aiModel.startsWith('gpt-')
+    ? settings.aiModel
+    : config.openai.model; // always fall back to Novita model from env
   const maxTokens   = settings?.aiMaxTokens   || config.openai.maxTokens;
   const temperature = settings?.aiTemperature || config.openai.temperature;
 
