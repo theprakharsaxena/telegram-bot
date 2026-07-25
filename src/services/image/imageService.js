@@ -55,7 +55,8 @@ async function generateImageWithFal(prompt, width = 1024, height = 1024) {
       image_size: {
         width: width,
         height: height
-      }
+      },
+      enable_safety_checker: false,
     };
 
     const queueResponse = await falAxiosInstance.post(
@@ -126,7 +127,7 @@ async function generateImageWithRunware(prompt) {
         numberResults: 1,
         outputType: ["dataURI", "URL"],
         outputFormat: "JPEG",
-        checkNSFW: true,
+        checkNSFW: false,
         CFGScale: 7,
         steps: 20,
         scheduler: "Default",
@@ -147,8 +148,6 @@ async function generateImageWithRunware(prompt) {
       if (imageTask?.imageURL) {
         logger.info("Image generated successfully with Runware AI");
         return imageTask.imageURL;
-      } else if (imageTask?.NSFWContent === true) {
-        throw new Error("NSFW content detected by Runware AI");
       } else {
         throw new Error("No image URL in Runware AI response");
       }
