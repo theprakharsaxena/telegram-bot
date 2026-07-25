@@ -23,7 +23,7 @@
 // ---------------------------------------------------------------------------
 const EXPLICIT_PATTERNS = [
   // Direct selfie/photo requests
-  /\b(send|show|share)\s+(me\s+)?(a\s+)?(selfie|photo|pic|picture|image|photo of you)\b/i,
+  /\b(send|show|share|see|view|peek|reveal|display|capture|snap|take|click|draw|generate|create|expose|uncover)\s+(me\s+)?(a\s+)?(selfie|photo|pic|picture|image|photo of you)\b/i,
   // "take a photo/picture"
   /\btake\s+(a\s+)?(photo|picture|selfie|pic)\b/i,
   // "generate / create / make a photo/image"
@@ -31,14 +31,14 @@ const EXPLICIT_PATTERNS = [
   // "imagine us at the beach" / "imagine you in Paris"
   /\bimagine\s+(us|you|yourself|me)\b/i,
   // "show us together" / "show yourself"
-  /\bshow\s+(us\s+together|yourself|you|me\s+you)\b/i,
+  /\b(show|display|reveal)\s+(us\s+together|yourself|you|me\s+you)\b/i,
   // Direct: "can you send a pic", "send photo"
-  /\bsend\s+(a\s+)?(pic|photo|image|selfie)\b/i,
+  /\b(send|show|give|share|see|view|peek|reveal|display|expose|uncover|forward|post|upload)\s+(a\s+)?(pic|photo|image|selfie)\b/i,
   // "what do you look like" (reasonable to generate an image)
-  /\bwhat\s+do\s+you\s+look\s+like\b/i,
+  /\b(what\s+do\s+you\s+look\s+like|let\s+me\s+see\s+you|how\s+do\s+you\s+look)\b/i,
   // Suggestive/NSFW requests (Female anatomy, clothing, actions, slang)
-  /\b(send|show|give|share)\s+(me\s+)?(your\s+)?(nudes?|naked(ness|ly)?|underwear|bikinis?|lingerie|panties|bras?|asses?|boobs?|boobies?|breasts?|tits?|puss(y|ies)|vaginas?|cunts?|nipples?|clits?|clitoris|bottomless|sex|sexy|sensual|explicit|nsfw|seductive|revealing|boudoir|cleavage|hot|erotic|porn|xxx|butts?|thongs?|stockings?|g-strings?|tanga|bralettes?|babydoll|negligee|topless|nacked|undressed|strips?|stripping|naughty|humps?|fucks?|fucking|masturbat(e|ing|ion)|orgasms?|erogenous|fetishes?|kinky|bdsm|bondage|erotica|seduces?|seduction|sensually|erotical|voluptuous|peekaboo)\b/i,
-  /\b(send|show|give|share)\s+(nudes?|naked(ness|ly)?|underwear|bikinis?|lingerie|panties|bras?|asses?|boobs?|boobies?|breasts?|tits?|puss(y|ies)|vaginas?|cunts?|nipples?|clits?|clitoris|bottomless|sex|sexy|sensual|explicit|nsfw|seductive|revealing|boudoir|cleavage|hot|erotic|porn|xxx|butts?|thongs?|stockings?|g-strings?|tanga|bralettes?|babydoll|negligee|topless|nacked|undressed|strips?|stripping|naughty|humps?|fucks?|fucking|masturbat(e|ing|ion)|orgasms?|erogenous|fetishes?|kinky|bdsm|bondage|erotica|seduces?|seduction|sensually|erotical|voluptuous|peekaboo)\b/i,
+  /\b(send|show|give|share|see|view|peek|reveal|display|expose|uncover|strip|undress|forward|post|upload)\s+(me\s+)?(your\s+)?(nudes?|naked(ness|ly)?|underwear|bikinis?|lingerie|panties|bras?|asses?|boobs?|boobies?|breasts?|tits?|puss(y|ies)|vaginas?|cunts?|nipples?|clits?|clitoris|bottomless|sex|sexy|sensual|explicit|nsfw|seductive|revealing|boudoir|cleavage|hot|erotic|porn|xxx|butts?|thongs?|stockings?|g-strings?|tanga|bralettes?|babydoll|negligee|topless|nacked|undressed|strips?|stripping|naughty|humps?|fucks?|fucking|masturbat(e|ing|ion)|orgasms?|erogenous|fetishes?|kinky|bdsm|bondage|erotica|seduces?|seduction|sensually|erotical|voluptuous|peekaboo)\b/i,
+  /\b(send|show|give|share|see|view|peek|reveal|display|expose|uncover|strip|undress|forward|post|upload)\s+(nudes?|naked(ness|ly)?|underwear|bikinis?|lingerie|panties|bras?|asses?|boobs?|boobies?|breasts?|tits?|puss(y|ies)|vaginas?|cunts?|nipples?|clits?|clitoris|bottomless|sex|sexy|sensual|explicit|nsfw|seductive|revealing|boudoir|cleavage|hot|erotic|porn|xxx|butts?|thongs?|stockings?|g-strings?|tanga|bralettes?|babydoll|negligee|topless|nacked|undressed|strips?|stripping|naughty|humps?|fucks?|fucking|masturbat(e|ing|ion)|orgasms?|erogenous|fetishes?|kinky|bdsm|bondage|erotica|seduces?|seduction|sensually|erotical|voluptuous|peekaboo)\b/i,
 ];
 
 // ---------------------------------------------------------------------------
@@ -48,7 +48,7 @@ const IMAGE_KEYWORDS = [
   { words: ['selfie', 'photo of you', 'picture of you'], score: 0.9 },
   { words: ['generate', 'create', 'make', 'draw', 'paint', 'render'], score: 0.4 },
   { words: ['image', 'picture', 'photo', 'pic', 'illustration', 'portrait'], score: 0.4 },
-  { words: ['show me', 'send me', 'share'], score: 0.3 },
+  { words: ['show me', 'send me', 'see me', 'share', 'see'], score: 0.3 },
   { words: ['together', 'us', 'beach', 'park', 'vacation', 'birthday'], score: 0.2 },
   { words: ['look like', 'appearance', 'outfit', 'wearing'], score: 0.3 },
 ];
