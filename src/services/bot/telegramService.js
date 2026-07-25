@@ -147,6 +147,25 @@ async function editMessage(chatId, messageId, newText, options = {}) {
 }
 
 /**
+ * Edit an existing photo message's caption.
+ */
+async function editMessageCaption(chatId, messageId, newCaption, options = {}) {
+  const bot = getBot();
+  try {
+    return await bot.editMessageCaption(newCaption, {
+      chat_id: chatId,
+      message_id: messageId,
+      parse_mode: 'HTML',
+      ...options,
+    });
+  } catch (err) {
+    if (err.message?.includes('message is not modified')) return null;
+    logger.error('editMessageCaption failed', { chatId, messageId, error: err.message });
+    throw err;
+  }
+}
+
+/**
  * Answer a callback query (dismisses the loading spinner on inline buttons).
  */
 async function answerCallback(callbackQueryId, text = '', showAlert = false) {
@@ -255,6 +274,7 @@ module.exports = {
   sendTyping,
   sendPhoto,
   editMessage,
+  editMessageCaption,
   answerCallback,
   answerPreCheckout,
   sendInvoice,

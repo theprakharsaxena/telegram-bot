@@ -8,7 +8,7 @@
  *   personality:locked         — inform user it's premium-only
  */
 
-const { sendMessage, editMessage, sendPhoto } = require('../../services/bot/telegramService');
+const { sendMessage, editMessage, editMessageCaption, sendPhoto } = require('../../services/bot/telegramService');
 const userService                   = require('../../services/userService');
 const { AdminSettings }             = require('../../models');
 const logger                        = require('../../utils/logger');
@@ -72,21 +72,22 @@ async function handlePersonalityCallback(action, query, ctx) {
         ];
       });
 
-      await editMessage(
-        chatId,
-        messageId,
-        `✨ <b>Personality switched to ${personality.emoji} ${personality.name}!</b>\n\n` +
+      const updateText = `✨ <b>Personality switched to ${personality.emoji} ${personality.name}!</b>\n\n` +
           `<i>${personality.description}</i>\n\n` +
-          `Select another or start chatting:`,
-        {
-          reply_markup: {
-            inline_keyboard: [
-              ...rows,
-              [{ text: '← Back', callback_data: 'action:back' }],
-            ],
-          },
-        }
-      );
+          `Select another or start chatting:`;
+      const updateMarkup = {
+        inline_keyboard: [
+          ...rows,
+          [{ text: '← Back', callback_data: 'action:back' }],
+        ],
+      };
+
+      try {
+        await editMessageCaption(chatId, messageId, updateText, { reply_markup: updateMarkup });
+      } catch (editErr) {
+        // Fallback to text message edit if the original menu was sent as a text message
+        await editMessage(chatId, messageId, updateText, { reply_markup: updateMarkup });
+      }
 
       // Send the greeting for the new personality as a fresh message
       if (personality.avatarUrls?.image1) {
