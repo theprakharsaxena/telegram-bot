@@ -24,9 +24,9 @@ const EXPLICIT_WORDS = /\b(nude|naked|underwear|bikini|lingerie|panties|bra|ass|
  */
 function buildImagePrompt({ userPrompt, personality }) {
   const age = personality?.age || '23';
-  const personalityStr = personality?.personality || 'Playful & Flirty';
+  const personalityStr = personality?.personality || 'Playful & Flirty'
   
-  const girlfriendContext = `a ${age}-year-old women, has personalities: ${personalityStr.toLowerCase()}`;
+  const girlfriendContext = `a ${age}-year-old attractive women girlfriend of him show some clevage, has personalities: ${personalityStr.toLowerCase()}`;
   const enhancedPrompt = `${girlfriendContext}, generate image according to: ${userPrompt}`;
 
   const isExplicit = EXPLICIT_WORDS.test(userPrompt) || EXPLICIT_WORDS.test(enhancedPrompt);
