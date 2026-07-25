@@ -141,6 +141,11 @@ app.use('/static', express.static(path.join(__dirname, '..', 'public')));
 // Health probes
 app.use('/health', healthRouter);
 
+// Redirect root to /admin
+app.get('/', (req, res) => {
+  res.redirect('/admin');
+});
+
 // Telegram webhook
 const webhookRouter = require('./routes/webhook');
 app.use('/webhook', webhookLimiter, webhookRouter);
