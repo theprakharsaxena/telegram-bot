@@ -12,7 +12,7 @@ const NEGATIVE_PROMPT =
   'low quality, watermark, text, logo, duplicate, morbid, mutilated, ' +
   'extra limbs, poorly drawn face, mutation, disfigured, bad anatomy';
 
-const EXPLICIT_WORDS = /\b(nude|naked|underwear|bikini|lingerie|panties|bra|ass|boobs|boobies|breasts|tits|pussy|vagina|cunt|nipples|clit|clitoris|bottomless|sex|sexy|sensual|explicit|nsfw|seductive|revealing|boudoir|cleavage|hot|erotic|porn|xxx|butt|thong|stockings|panties|g-string|tanga|bralette|babydoll|negligee|topless|nacked|nakedness|nudity|nakedly|undressed|strip|stripping|naughty|hump|fuck|masturbate|orgasm|erogenous|fetish|kinky|bdsm|bondage|erotica|seduce|seducing|lust|horny|aroused|sensually|erotical|voluptuous|peekaboo)\b/i;
+const EXPLICIT_WORDS = /\b(nudes?|naked(ness|ly)?|underwear|bikinis?|lingerie|panties|bras?|asses?|boobs?|boobies?|breasts?|tits?|puss(y|ies)|vaginas?|cunts?|nipples?|clits?|clitoris|bottomless|sex|sexy|sensual|explicit|nsfw|seductive|revealing|boudoir|cleavage|hot|erotic|porn|xxx|butts?|thongs?|stockings?|g-strings?|tanga|bralettes?|babydoll|negligee|topless|nacked|undressed|strips?|stripping|naughty|humps?|fucks?|fucking|masturbat(e|ing|ion)|orgasms?|erogenous|fetishes?|kinky|bdsm|bondage|erotica|seduces?|seduction|sensually|erotical|voluptuous|peekaboo)\b/i;
 
 /**
  * Build the prompt format for the image generator.
