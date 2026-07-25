@@ -58,7 +58,7 @@ async function initBotHandlers() {
   bot.onText(/\/help(@\S+)?/,        withBotAuth(helpCommand));
   bot.onText(/\/profile(@\S+)?/,     withBotAuth(profileCommand));
   bot.onText(/\/settings(@\S+)?/,    withBotAuth(settingsCommand));
-  bot.onText(/\/personality(@\S+)?/, withBotAuth(personalityCommand));
+  bot.onText(/\/girlfriends(@\S+)?/, withBotAuth(personalityCommand));
   bot.onText(/\/reset(@\S+)?/,       withBotAuth(resetCommand));
   bot.onText(/\/usage(@\S+)?/,       withBotAuth(usageCommand));
 

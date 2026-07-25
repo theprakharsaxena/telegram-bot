@@ -33,7 +33,7 @@ async function helpCommand(msg) {
     `/start — Restart and see the welcome message\n` +
     `/help — Show this guide\n` +
     `/profile — View your profile & usage stats\n` +
-    `/personality — Switch between AI personalities\n` +
+    `/girlfriends — Switch My Girlfriend\n` +
     `/premium — View & manage premium subscription\n` +
     `/memory — See and manage what I remember about you\n` +
     `/reset — Clear conversation history (fresh start)\n` +
@@ -58,7 +58,7 @@ async function helpCommand(msg) {
     inline_keyboard: [
       [
         { text: '💬 Chat now',      callback_data: 'action:chat' },
-        { text: '✨ Personalities', callback_data: 'action:personalities' },
+        { text: '✨ Girlfriends', callback_data: 'action:personalities' },
       ],
       ...(!isPremium
         ? [[{ text: '⭐ Upgrade to Premium', callback_data: 'action:premium' }]]

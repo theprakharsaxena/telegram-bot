@@ -213,7 +213,7 @@ async function handleChatMessage(msg) {
     );
 
     if (!personality) {
-      await sendMessage(chatId, '😔 Could not load personality. Try /personality to reset!');
+      await sendMessage(chatId, '😔 Could not load personality. Try /girlfriends to reset!');
       return;
     }
 

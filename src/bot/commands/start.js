@@ -45,7 +45,7 @@ async function startCommand(msg) {
     inline_keyboard: [
       [
         { text: '💬 Start chatting', callback_data: 'action:chat' },
-        { text: '✨ Personalities',  callback_data: 'action:personalities' },
+        { text: '✨ Girlfriends',  callback_data: 'action:personalities' },
       ],
       [
         { text: '⭐ Go Premium',  callback_data: 'action:premium' },

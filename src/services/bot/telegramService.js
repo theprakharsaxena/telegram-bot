@@ -250,7 +250,7 @@ async function setBotCommands() {
     { command: 'start',       description: '👋 Start or restart the bot' },
     { command: 'help',        description: '❓ Show help and commands' },
     { command: 'profile',     description: '👤 View your profile & stats' },
-    { command: 'personality', description: '✨ Switch AI personality' },
+    { command: 'girlfriends', description: '✨ Switch My Girlfriend' },
     { command: 'premium',     description: '⭐ View premium plans' },
     { command: 'memory',      description: '🧠 Manage what I remember' },
     { command: 'reset',       description: '🔄 Reset conversation history' },
