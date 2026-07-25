@@ -14,7 +14,7 @@
  */
 
 const { sendMessage }   = require('../../services/bot/telegramService');
-const { UsageTracking } = require('../../models');
+const usageService      = require('../../services/usage/usageService');
 const config            = require('../../config/env');
 
 async function profileCommand(msg) {
@@ -26,18 +26,24 @@ async function profileCommand(msg) {
     year: 'numeric', month: 'long', day: 'numeric',
   });
 
-  // Fetch today's usage
-  const today    = new Date().toISOString().slice(0, 10);
-  const limits   = isPremium ? config.limits.premium : config.limits.free;
-  const usage    = await UsageTracking.findOne({ telegramId: user.telegramId, date: today });
+  // Fetch today's usage and resolved limits
+  const usage      = await usageService.getTodayUsage(user.telegramId);
+  const limits     = await usageService.getLimits();
+  const planKey    = isPremium ? 'premium' : 'free';
+  const planLimits = limits[planKey];
+
   const msgUsed  = usage?.messagesUsed  ?? 0;
   const imgUsed  = usage?.imagesUsed    ?? 0;
+  const msgLimit = usage?.messageLimit  ?? planLimits.dailyMessages;
+  const imgLimit = usage?.imageLimit    ?? planLimits.dailyImages;
 
   // Build usage bar (visual progress indicator)
   function usageBar(used, limit, width = 10) {
     const filled = Math.min(Math.round((used / limit) * width), width);
     return '█'.repeat(filled) + '░'.repeat(width - filled);
   }
+
+  const msgLimitLabel = isPremium ? 'Unlimited' : msgLimit;
 
   const text =
     `👤 <b>${user.displayName}'s Profile</b>\n\n` +
@@ -51,10 +57,10 @@ async function profileCommand(msg) {
     `✨ Personality: <b>${user.activePersonality}</b>\n\n` +
 
     `<b>📊 Today's Usage</b>\n` +
-    `💬 Messages: ${msgUsed}/${isPremium ? 'Unlimited' : limits.dailyMessages}\n` +
-    `   ${isPremium ? '█'.repeat(10) : usageBar(msgUsed, limits.dailyMessages)}\n` +
-    `🖼️ Images: ${imgUsed}/${limits.dailyImages}\n` +
-    `   ${usageBar(imgUsed, limits.dailyImages)}\n\n` +
+    `💬 Messages: ${msgUsed}/${msgLimitLabel}\n` +
+    `   ${isPremium ? '█'.repeat(10) : usageBar(msgUsed, msgLimit)}\n` +
+    `🖼️ Images: ${imgUsed}/${imgLimit}\n` +
+    `   ${usageBar(imgUsed, imgLimit)}\n\n` +
 
     `<b>📈 All-time Stats</b>\n` +
     `💬 Total messages: ${user.stats?.totalMessages ?? 0}\n` +
