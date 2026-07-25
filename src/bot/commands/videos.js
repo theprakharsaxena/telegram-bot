@@ -15,7 +15,7 @@ async function videosCommand(msg) {
       return;
     }
 
-    await sendMessage(chatId, `🎬 <b>Premium Video Gallery</b>\n\nHere are the latest uncensored videos of your girlfriends! 🔥\nTotal videos: <b>${videos.length}</b>`);
+    await sendMessage(chatId, `🎬 <b>Premium Video Gallery</b>\n\nHere are the latest uncensored videos! 🔥`);
 
     for (const video of videos) {
       if (isPremium) {
@@ -44,14 +44,8 @@ async function videosCommand(msg) {
         const lockedText = `🔒 <b>${video.title}</b> [Locked]\n\n` +
                            `⚠️ <i>This explicit uncensored video is only available for VIP members!</i>`;
 
-        // Use a heavily blurred variant of the thumbnail as placeholder (or fallback blurred placeholder)
-        let previewImage = video.thumbnailUrl;
-        if (previewImage.includes('unsplash.com')) {
-          previewImage += previewImage.includes('?') ? '&blur=80' : '?blur=80';
-        } else {
-          // Fallback locked placeholder image
-          previewImage = 'https://img.freepik.com/free-vector/gradient-locked-premium-content-concept_23-2149179836.jpg';
-        }
+        // Dynamically blur the original thumbnail image using wsrv.nl proxy so it's the exact same image but blurred
+        const previewImage = `https://wsrv.nl/?url=${encodeURIComponent(video.thumbnailUrl)}&blur=10`;
 
         const replyMarkup = {
           inline_keyboard: [
