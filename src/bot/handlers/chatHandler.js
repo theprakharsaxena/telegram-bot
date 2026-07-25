@@ -207,7 +207,7 @@ async function handleChatMessage(msg) {
     const { isImageRequest } = detectImageRequest(text);
 
     // ── 4. Get active personality ───────────────────────────────────────
-    const personalityKey = user.activePersonality || 'luna';
+    const personalityKey = user.activePersonality || 'sarah-23';
     const personality    = settings.personalities?.find(
       (p) => p.key === personalityKey && p.isActive
     );

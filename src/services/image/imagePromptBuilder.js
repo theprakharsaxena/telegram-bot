@@ -83,7 +83,7 @@ function detectScene(text) {
  */
 function buildImagePrompt({ userPrompt, personality, personalityName }) {
   const styleHint = personality?.imageStylePrompt || 'soft aesthetic, natural lighting';
-  const name      = personalityName || personality?.name || 'Luna';
+  const name      = personalityName || personality?.name || 'Sarah';
 
   const { scene, place } = detectScene(userPrompt);
 

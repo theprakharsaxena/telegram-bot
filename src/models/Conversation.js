@@ -39,7 +39,7 @@ const conversationSchema = new mongoose.Schema(
     personality: {
       type: String,
       required: true,
-      default: 'luna',
+      default: 'sarah-23',
       maxlength: 32,
       index: true,
     },

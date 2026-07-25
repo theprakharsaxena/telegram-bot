@@ -111,7 +111,7 @@ const userSchema = new mongoose.Schema(
     // Full personality definitions live in AdminSettings, not per-user.
     activePersonality: {
       type: String,
-      default: 'luna',
+      default: 'sarah-23',
       maxlength: 32,
     },
 
