@@ -80,7 +80,7 @@ if (config.sentry.dsn) {
 // ---------------------------------------------------------------------------
 app.use(
   helmet({
-    contentSecurityPolicy: config.isProduction ? undefined : false,
+    contentSecurityPolicy: false,
   })
 );
 
