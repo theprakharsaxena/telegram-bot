@@ -65,8 +65,12 @@
                 <% } %>
               </td>
               <td>
-                <button class="btn btn-ghost btn-sm" style="margin-right: 4px;"
-                        onclick="openCreditsModal('<%= u.telegramId %>', '<%= u.firstName || u.username || u.telegramId %>', '<%= u.customFreeMessages !== null ? u.customFreeMessages : '' %>', '<%= u.customFreeImages !== null ? u.customFreeImages : '' %>')">
+                <button class="btn btn-ghost btn-sm btn-credits" style="margin-right: 4px;"
+                        data-telegram-id="<%= u.telegramId %>"
+                        data-name="<%= u.firstName || u.username || u.telegramId %>"
+                        data-messages="<%= u.customFreeMessages !== null ? u.customFreeMessages : '' %>"
+                        data-images="<%= u.customFreeImages !== null ? u.customFreeImages : '' %>"
+                        onclick="handleCreditsClick(this)">
                   Credits
                 </button>
                 <% if (u.isBanned) { %>
@@ -150,6 +154,14 @@ async function adminAction(url, body) {
   } catch (e) {
     showToast('Request failed', false);
   }
+}
+
+function handleCreditsClick(btn) {
+  const telegramId = btn.getAttribute('data-telegram-id');
+  const name = btn.getAttribute('data-name');
+  const messages = btn.getAttribute('data-messages');
+  const images = btn.getAttribute('data-images');
+  openCreditsModal(telegramId, name, messages, images);
 }
 
 function openCreditsModal(telegramId, name, currentMessages, currentImages) {
