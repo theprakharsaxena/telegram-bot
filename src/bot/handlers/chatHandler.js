@@ -358,6 +358,15 @@ async function handleChatMessage(msg) {
               userPlan:         plan,
             });
 
+            // Send loading/clicking notification to the user
+            const loadingMsg = await sendMessage(
+              chatId,
+              `📸 <i>*Clicks* One second, taking a picture for you...</i>`,
+              { parse_mode: 'HTML' }
+            ).catch(() => null);
+
+            const loadingMessageId = loadingMsg ? loadingMsg.message_id : null;
+
             // Queue the generation job
             await queueImageGeneration(
               {
@@ -371,6 +380,7 @@ async function handleChatMessage(msg) {
                   imageStylePrompt: personality.imageStylePrompt,
                 },
                 isPremium,
+                loadingMessageId,
               },
               isPremium
             );

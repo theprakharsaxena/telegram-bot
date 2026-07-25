@@ -41,6 +41,11 @@
               <td>
                 <strong><%= u.firstName || '' %> <%= u.lastName || '' %></strong>
                 <% if (u.username) { %><br><span class="text-muted">@<%= u.username %></span><% } %>
+                <% if (u.customFreeMessages !== null || u.customFreeImages !== null) { %>
+                  <div style="font-size: 11px; margin-top: 4px; color: #a78bfa;">
+                    Custom limits: ✉️ <%= u.customFreeMessages !== null ? u.customFreeMessages : 'Default' %> | 🖼️ <%= u.customFreeImages !== null ? u.customFreeImages : 'Default' %>
+                  </div>
+                <% } %>
               </td>
               <td class="text-muted"><%= u.telegramId %></td>
               <td>
@@ -60,6 +65,10 @@
                 <% } %>
               </td>
               <td>
+                <button class="btn btn-ghost btn-sm" style="margin-right: 4px;"
+                        onclick="openCreditsModal('<%= u.telegramId %>', '<%= u.firstName || u.username || u.telegramId %>', '<%= u.customFreeMessages !== null ? u.customFreeMessages : '' %>', '<%= u.customFreeImages !== null ? u.customFreeImages : '' %>')">
+                  Credits
+                </button>
                 <% if (u.isBanned) { %>
                   <button class="btn btn-ghost btn-sm"
                           onclick="adminAction('/admin/users/unban', { telegramId: '<%= u.telegramId %>' })">
@@ -95,6 +104,32 @@
   </main>
 </div>
 
+<div id="credits-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); align-items:center; justify-content:center; z-index:1000;">
+  <div class="card" style="width:100%; max-width:400px; padding:24px; position:relative; background:#1a1a2e; border:1px solid #2d2d44; border-radius:10px;">
+    <h3 style="margin-bottom:16px; color:#a78bfa;">Edit Credits Override</h3>
+    <p id="credits-modal-user" style="font-size:13px; color:#94a3b8; margin-bottom:20px;"></p>
+    
+    <input type="hidden" id="credits-modal-telegramId">
+    
+    <div class="form-group">
+      <label for="credits-modal-messages">Custom Daily Messages Limit</label>
+      <input type="number" id="credits-modal-messages" placeholder="Use Default limit">
+      <small style="color:#64748b; font-size:11px;">Leave empty or clear to use the default plan limit.</small>
+    </div>
+    
+    <div class="form-group" style="margin-top:12px;">
+      <label for="credits-modal-images">Custom Daily Images Limit</label>
+      <input type="number" id="credits-modal-images" placeholder="Use Default limit">
+      <small style="color:#64748b; font-size:11px;">Leave empty or clear to use the default plan limit.</small>
+    </div>
+    
+    <div style="display:flex; justify-content:flex-end; gap:8px; margin-top:24px;">
+      <button class="btn btn-ghost" onclick="closeCreditsModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="saveCreditsOverride()">Save Changes</button>
+    </div>
+  </div>
+</div>
+
 <div id="toast" style="display:none; position:fixed; bottom:24px; right:24px;
      background:#1a1a2e; border:1px solid #2d2d44; padding:12px 20px;
      border-radius:8px; font-size:14px; z-index:9999;"></div>
@@ -116,6 +151,42 @@ async function adminAction(url, body) {
     showToast('Request failed', false);
   }
 }
+
+function openCreditsModal(telegramId, name, currentMessages, currentImages) {
+  document.getElementById('credits-modal-telegramId').value = telegramId;
+  document.getElementById('credits-modal-user').textContent = 'User: ' + name + ' (ID: ' + telegramId + ')';
+  document.getElementById('credits-modal-messages').value = currentMessages;
+  document.getElementById('credits-modal-images').value = currentImages;
+  document.getElementById('credits-modal').style.display = 'flex';
+}
+
+function closeCreditsModal() {
+  document.getElementById('credits-modal').style.display = 'none';
+}
+
+async function saveCreditsOverride() {
+  const telegramId = document.getElementById('credits-modal-telegramId').value;
+  const customFreeMessages = document.getElementById('credits-modal-messages').value;
+  const customFreeImages = document.getElementById('credits-modal-images').value;
+  
+  try {
+    const res = await fetch('/admin/users/update-credits', {
+      method: 'POST',
+      headers: { 
+        'Content-Type': 'application/json',
+        'X-Admin-Key': '' 
+      },
+      body: JSON.stringify({ telegramId, customFreeMessages, customFreeImages }),
+    });
+    const data = await res.json();
+    showToast(data.message || 'Done', data.status === 'ok');
+    closeCreditsModal();
+    if (data.status === 'ok') setTimeout(() => location.reload(), 1200);
+  } catch (e) {
+    showToast('Failed to update credits', false);
+  }
+}
+
 function showToast(msg, ok) {
   const t = document.getElementById('toast');
   t.textContent = msg;

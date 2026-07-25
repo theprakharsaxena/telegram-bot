@@ -3,35 +3,163 @@
 /**
  * ImageService
  *
- * Wraps the Replicate API for SDXL image generation.
+ * Handles image generation routing between Fal AI and Runware AI.
+ * Uses Fal AI (Sana model) by default, and Runware AI if the prompt contains explicit words.
  *
  * Flow:
  *   1. Create a GeneratedImage record (status: pending)
- *   2. Submit prediction to Replicate
- *   3. Poll until succeeded / failed (max 120s)
+ *   2. Detect if prompt contains explicit keywords
+ *   3. Generate image using the selected API
  *   4. Update the GeneratedImage record
  *   5. Send the image to Telegram
  *   6. Save Telegram file_id for cheap re-sends
- *
- * Why polling instead of webhooks?
- *   Replicate webhooks require a public HTTPS URL at generation time.
- *   In development we use polling. In production both work — polling
- *   is simpler to deploy and reliable enough for image generation latency.
  */
 
-const Replicate    = require('replicate');
+const axios = require('axios');
+const { v4: uuidv4 } = require('uuid');
 const { GeneratedImage } = require('../../models');
 const { buildImagePrompt } = require('./imagePromptBuilder');
-const { sendPhoto, sendMessage } = require('../bot/telegramService');
+const { sendPhoto, sendMessage, deleteMessage } = require('../bot/telegramService');
 const config       = require('../../config/env');
 const logger       = require('../../utils/logger');
 
-// Singleton Replicate client
-const replicate = new Replicate({ auth: config.replicate.apiToken });
+// Axios instances for Fal AI and Runware AI
+const falAxiosInstance = axios.create({
+  timeout: 30000,
+  headers: {
+    Authorization: `Key ${process.env.FAL_KEY}`,
+    "Content-Type": "application/json",
+  },
+});
 
-// Polling config
-const POLL_INTERVAL_MS = 3000;  // check every 3 seconds
-const POLL_TIMEOUT_MS  = 120000; // give up after 2 minutes
+const runwareAxiosInstance = axios.create({
+  baseURL: "https://api.runware.ai/v1",
+  timeout: 30000,
+  headers: {
+    "Content-Type": "application/json",
+  },
+});
+
+// Regex to detect explicit/suggestive words
+const EXPLICIT_WORDS = /\b(nude|naked|underwear|bikini|lingerie|panties|bra|ass|boobs|breasts|sexy|sensual|explicit|nsfw|seductive|revealing|boudoir|cleavage|hot|erotic|porn|xxx|butt|sex)\b/i;
+
+// Helper function for Fal AI image generation (Sana model)
+async function generateImageWithFal(prompt, width = 1024, height = 1024) {
+  try {
+    if (!prompt?.trim()) {
+      throw new Error("Prompt is required and cannot be empty");
+    }
+
+    const imagePromptData = {
+      prompt: prompt.trim(),
+      image_size: {
+        width: width,
+        height: height
+      }
+    };
+
+    const queueResponse = await falAxiosInstance.post(
+      "https://queue.fal.run/fal-ai/sana",
+      imagePromptData
+    );
+
+    const requestId = queueResponse.data.request_id;
+    let attempts = 0;
+    const maxAttempts = 30;
+    let imageUrl = null;
+
+    while (attempts < maxAttempts) {
+      const statusResponse = await falAxiosInstance.get(
+        `https://queue.fal.run/fal-ai/sana/requests/${requestId}/status`
+      );
+
+      if (statusResponse.data.status === "COMPLETED") {
+        const resultResponse = await falAxiosInstance.get(
+          `https://queue.fal.run/fal-ai/sana/requests/${requestId}`
+        );
+
+        if (resultResponse.data.images?.[0]?.url) {
+          imageUrl = resultResponse.data.images[0].url;
+          logger.info("Image generated successfully with fal.ai");
+          break;
+        }
+      } else if (statusResponse.data.status === "FAILED") {
+        throw new Error("Fal.ai image generation failed");
+      }
+
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+      attempts++;
+    }
+
+    if (!imageUrl && attempts >= maxAttempts) {
+      throw new Error("Fal.ai image generation timed out");
+    }
+
+    return imageUrl;
+  } catch (falError) {
+    logger.error("Fal.ai error:", falError);
+    throw new Error("Fal AI image generation failed: " + falError.message);
+  }
+}
+
+// Helper function for Runware AI image generation
+async function generateImageWithRunware(prompt) {
+  try {
+    const taskUUID = uuidv4();
+    const apiKey = process.env.RUNWARE_API_KEY;
+
+    if (!apiKey) {
+      throw new Error("RUNWARE_API_KEY is not set in environment variables");
+    }
+
+    const requestPayload = [
+      {
+        taskType: "authentication",
+        apiKey: apiKey,
+      },
+      {
+        taskType: "imageInference",
+        model: "civitai:573152@638929",
+        positivePrompt: prompt,
+        height: 512,
+        width: 512,
+        numberResults: 1,
+        outputType: ["dataURI", "URL"],
+        outputFormat: "JPEG",
+        checkNSFW: true,
+        CFGScale: 7,
+        steps: 20,
+        scheduler: "Default",
+        includeCost: true,
+        outputQuality: 85,
+        taskUUID: taskUUID,
+      },
+    ];
+
+    const response = await runwareAxiosInstance.post("", requestPayload);
+
+    if (response.data?.data && Array.isArray(response.data.data)) {
+      const imageTask = response.data.data.find(
+        (item) =>
+          item.taskType === "imageInference" && item.taskUUID === taskUUID
+      );
+
+      if (imageTask?.imageURL) {
+        logger.info("Image generated successfully with Runware AI");
+        return imageTask.imageURL;
+      } else if (imageTask?.NSFWContent === true) {
+        throw new Error("NSFW content detected by Runware AI");
+      } else {
+        throw new Error("No image URL in Runware AI response");
+      }
+    } else {
+      throw new Error("Invalid response format from Runware AI");
+    }
+  } catch (error) {
+    logger.error("Runware AI Error:", error);
+    throw error;
+  }
+}
 
 // ---------------------------------------------------------------------------
 // Core generation function
@@ -40,16 +168,9 @@ const POLL_TIMEOUT_MS  = 120000; // give up after 2 minutes
 /**
  * Generate an image and send it to the user.
  * Called by the BullMQ worker — runs in the background.
- *
- * @param {object} jobData
- * @param {string} jobData.generatedImageId  — GeneratedImage _id
- * @param {number} jobData.telegramId
- * @param {number} jobData.chatId
- * @param {string} jobData.userPrompt
- * @param {object} jobData.personality       — personality document snapshot
  */
 async function processImageGeneration(jobData) {
-  const { generatedImageId, telegramId, chatId, userPrompt, personality } = jobData;
+  const { generatedImageId, telegramId, chatId, userPrompt, personality, loadingMessageId } = jobData;
 
   // Load the pending record
   const imageRecord = await GeneratedImage.findById(generatedImageId);
@@ -79,61 +200,36 @@ async function processImageGeneration(jobData) {
       scene: enhancedPrompt.slice(0, 80),
     });
 
-    // ── 2. Submit to Replicate ───────────────────────────────────────────
-    // Parse model string: "owner/model:version" or "owner/model"
-    const modelStr = config.replicate.imageModel;
-    const [modelPath, version] = modelStr.includes(':')
-      ? [modelStr.split(':')[0], modelStr.split(':').slice(1).join(':')]
-      : [modelStr, null];
+    // Check for explicit words to determine routing
+    const isExplicit = EXPLICIT_WORDS.test(userPrompt) || EXPLICIT_WORDS.test(enhancedPrompt);
+    let imageUrl = null;
 
-    const input = {
-      prompt:            enhancedPrompt,
-      negative_prompt:   negativePrompt,
-      width:             1024,
-      height:            1024,
-      num_inference_steps: 30,
-      guidance_scale:    7.5,
-      scheduler:         'K_EULER',
-      num_outputs:       1,
-    };
-
-    let prediction;
-    if (version) {
-      prediction = await replicate.predictions.create({
-        version,
-        input,
-      });
+    if (isExplicit) {
+      logger.info('Explicit prompt detected, routing to Runware AI', { telegramId, userPrompt });
+      imageRecord.model = 'runware-civitai:573152@638929';
+      await imageRecord.save();
+      imageUrl = await generateImageWithRunware(enhancedPrompt);
     } else {
-      prediction = await replicate.run(modelPath, { input });
+      logger.info('Default prompt, routing to Fal AI (Sana)', { telegramId, userPrompt });
+      imageRecord.model = 'fal-ai/sana';
+      await imageRecord.save();
+      imageUrl = await generateImageWithFal(enhancedPrompt);
     }
 
-    // If run() returned array directly (sync models), handle immediately
-    if (Array.isArray(prediction)) {
-      return await handleSuccessfulGeneration(
-        imageRecord, prediction[0], chatId, personality
-      );
+    if (loadingMessageId) {
+      await deleteMessage(chatId, loadingMessageId).catch(() => {});
     }
 
-    // Save Replicate prediction ID for tracking
-    imageRecord.replicatePredictionId = prediction.id;
-    await imageRecord.save();
-
-    // ── 3. Poll for completion ───────────────────────────────────────────
-    const result = await pollPrediction(prediction.id);
-
-    if (result.status === 'succeeded' && result.output?.length > 0) {
-      await handleSuccessfulGeneration(
-        imageRecord, result.output[0], chatId, personality
-      );
+    if (imageUrl) {
+      await handleSuccessfulGeneration(imageRecord, imageUrl, chatId, personality);
     } else {
-      await handleFailedGeneration(
-        imageRecord,
-        result.error || 'Generation failed',
-        chatId
-      );
+      await handleFailedGeneration(imageRecord, 'Image generation returned empty URL', chatId);
     }
 
   } catch (err) {
+    if (loadingMessageId) {
+      await deleteMessage(chatId, loadingMessageId).catch(() => {});
+    }
     logger.error('Image generation error', {
       generatedImageId,
       telegramId,
@@ -141,30 +237,6 @@ async function processImageGeneration(jobData) {
     });
     await handleFailedGeneration(imageRecord, err.message, chatId);
   }
-}
-
-// ---------------------------------------------------------------------------
-// Poll Replicate prediction until done
-// ---------------------------------------------------------------------------
-
-async function pollPrediction(predictionId) {
-  const deadline = Date.now() + POLL_TIMEOUT_MS;
-
-  while (Date.now() < deadline) {
-    await sleep(POLL_INTERVAL_MS);
-
-    const prediction = await replicate.predictions.get(predictionId);
-
-    if (prediction.status === 'succeeded' || prediction.status === 'failed' ||
-        prediction.status === 'canceled') {
-      return prediction;
-    }
-
-    logger.info('Polling prediction', { predictionId, status: prediction.status });
-  }
-
-  // Timeout — treat as failed
-  return { status: 'failed', error: 'Generation timed out after 2 minutes' };
 }
 
 // ---------------------------------------------------------------------------
@@ -261,7 +333,7 @@ async function createPendingImageRecord({
     userPrompt,
     enhancedPrompt,
     negativePrompt,
-    model:    config.replicate.imageModel,
+    model:    'fal-ai/sana', // Default model reference
     width:    1024,
     height:   1024,
     steps:    30,
@@ -287,13 +359,6 @@ async function getImageHistory(userId, limit = 10, page = 1) {
     .skip(skip)
     .limit(limit)
     .lean();
-}
-
-// ---------------------------------------------------------------------------
-// Utility
-// ---------------------------------------------------------------------------
-function sleep(ms) {
-  return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 module.exports = {

@@ -22,7 +22,7 @@
  *   → config.limits.free / premium            (env fallback)
  */
 
-const { UsageTracking, AdminSettings } = require('../../models');
+const { UsageTracking, AdminSettings, User } = require('../../models');
 const { redisClient }                  = require('../../config/redis');
 const config                           = require('../../config/env');
 const logger                           = require('../../utils/logger');
@@ -80,7 +80,23 @@ async function getLimits() {
  */
 async function getOrCreateToday(userId, telegramId, plan) {
   const limits    = await getLimits();
-  const planLimits = limits[plan] || limits.free;
+  const planLimits = { ...(limits[plan] || limits.free) };
+
+  if (plan === 'free') {
+    try {
+      const userObj = await User.findById(userId);
+      if (userObj) {
+        if (typeof userObj.customFreeMessages === 'number' && userObj.customFreeMessages !== null) {
+          planLimits.dailyMessages = userObj.customFreeMessages;
+        }
+        if (typeof userObj.customFreeImages === 'number' && userObj.customFreeImages !== null) {
+          planLimits.dailyImages = userObj.customFreeImages;
+        }
+      }
+    } catch (err) {
+      logger.error('Failed to resolve custom limits for user', { userId, error: err.message });
+    }
+  }
 
   return UsageTracking.getOrCreateToday(userId, telegramId, plan, planLimits);
 }

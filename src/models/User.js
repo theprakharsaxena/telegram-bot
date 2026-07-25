@@ -140,6 +140,10 @@ const userSchema = new mongoose.Schema(
     // ── Free trial tracking ───────────────────────────────────────────────
     trialUsed: { type: Boolean, default: false },
     trialStartedAt: { type: Date, default: null },
+
+    // ── Custom plan credit overrides per user ─────────────────────────────
+    customFreeMessages: { type: Number, default: null },
+    customFreeImages: { type: Number, default: null },
   },
   {
     timestamps: true, // adds createdAt, updatedAt automatically

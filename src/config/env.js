@@ -44,11 +44,9 @@ const envSchema = Joi.object({
   NOVITA_MAX_TOKENS: Joi.number().integer().default(2048),
   NOVITA_TEMPERATURE: Joi.number().min(0).max(2).default(1),
 
-  // ── Replicate (Image Generation) ──────────────────────────────────────────
-  REPLICATE_API_TOKEN: Joi.string().required(),
-  REPLICATE_IMAGE_MODEL: Joi.string().default(
-    'stability-ai/sdxl:39ed52f2319f9b4cf9d5f9b3c5b9a6c7d2e5f8a1b3c6e9f2a4b7d0e3f6a9b2c5'
-  ),
+  // ── Fal AI & Runware AI (Image Generation) ────────────────────────────────
+  FAL_KEY: Joi.string().required(),
+  RUNWARE_API_KEY: Joi.string().required(),
 
   // ── Sentry ────────────────────────────────────────────────────────────────
   SENTRY_DSN: Joi.string().uri().allow('').default(''),
@@ -140,9 +138,9 @@ const config = {
     temperature: envVars.NOVITA_TEMPERATURE,
   },
 
-  replicate: {
-    apiToken: envVars.REPLICATE_API_TOKEN,
-    imageModel: envVars.REPLICATE_IMAGE_MODEL,
+  imageGen: {
+    falKey: envVars.FAL_KEY,
+    runwareApiKey: envVars.RUNWARE_API_KEY,
   },
 
   sentry: {

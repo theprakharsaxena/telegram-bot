@@ -9,7 +9,7 @@
 
 const {
   User, Analytics, Payment, Subscription,
-  GeneratedImage, AdminSettings, Message,
+  GeneratedImage, AdminSettings, Message, UsageTracking,
 } = require('../models');
 const { getQueueStats }    = require('../jobs/imageQueue');
 const userService          = require('../services/userService');
@@ -332,6 +332,63 @@ async function broadcastMessage(req, res) {
   }
 }
 
+async function updateCredits(req, res) {
+  try {
+    const { telegramId, customFreeMessages, customFreeImages } = req.body;
+    
+    const parsedTelegramId = parseInt(telegramId);
+    if (isNaN(parsedTelegramId)) {
+      throw new Error('Invalid Telegram ID');
+    }
+
+    const messages = (customFreeMessages === '' || customFreeMessages === undefined || customFreeMessages === null) ? null : parseInt(customFreeMessages);
+    const images = (customFreeImages === '' || customFreeImages === undefined || customFreeImages === null) ? null : parseInt(customFreeImages);
+
+    const user = await User.findOneAndUpdate(
+      { telegramId: parsedTelegramId },
+      { 
+        customFreeMessages: isNaN(messages) ? null : messages, 
+        customFreeImages: isNaN(images) ? null : images 
+      },
+      { new: true }
+    );
+
+    if (!user) {
+      throw new Error('User not found');
+    }
+
+    // Update today's usage limits if it exists
+    const now = new Date();
+    const date = now.toISOString().slice(0, 10);
+    
+    const updateObj = {};
+    if (user.customFreeMessages !== null) {
+      updateObj.messageLimit = user.customFreeMessages;
+    } else {
+      // Fallback to standard free limit
+      const settings = await AdminSettings.getSettings();
+      updateObj.messageLimit = settings.freeLimits?.dailyMessages ?? config.limits.free.dailyMessages;
+    }
+
+    if (user.customFreeImages !== null) {
+      updateObj.imageLimit = user.customFreeImages;
+    } else {
+      // Fallback to standard free limit
+      const settings = await AdminSettings.getSettings();
+      updateObj.imageLimit = settings.freeLimits?.dailyImages ?? config.limits.free.dailyImages;
+    }
+
+    await UsageTracking.findOneAndUpdate(
+      { telegramId: parsedTelegramId, date },
+      { $set: updateObj }
+    );
+
+    return res.json({ status: 'ok', message: 'Credits updated successfully', user });
+  } catch (err) {
+    return res.status(400).json({ status: 'fail', message: err.message });
+  }
+}
+
 module.exports = {
   getOverview,
   getUsers,
@@ -341,4 +398,5 @@ module.exports = {
   getSettings,
   updateSettings,
   broadcastMessage,
+  updateCredits,
 };
