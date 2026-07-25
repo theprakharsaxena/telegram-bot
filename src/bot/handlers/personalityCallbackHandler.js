@@ -8,7 +8,7 @@
  *   personality:locked         — inform user it's premium-only
  */
 
-const { sendMessage, editMessage } = require('../../services/bot/telegramService');
+const { sendMessage, editMessage, sendPhoto } = require('../../services/bot/telegramService');
 const userService                   = require('../../services/userService');
 const { AdminSettings }             = require('../../models');
 const logger                        = require('../../utils/logger');
@@ -89,7 +89,14 @@ async function handlePersonalityCallback(action, query, ctx) {
       );
 
       // Send the greeting for the new personality as a fresh message
-      await sendMessage(chatId, personality.greeting);
+      if (personality.avatarUrls?.image1) {
+        await sendPhoto(chatId, personality.avatarUrls.image1, {
+          caption: personality.greeting,
+          parse_mode: 'HTML'
+        });
+      } else {
+        await sendMessage(chatId, personality.greeting);
+      }
     } catch (err) {
       if (err.statusCode === 403) {
         await sendMessage(

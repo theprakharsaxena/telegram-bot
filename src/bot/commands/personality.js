@@ -8,7 +8,7 @@
  * premium-only. Tapping one triggers personalityCallbackHandler.
  */
 
-const { sendMessage }   = require('../../services/bot/telegramService');
+const { sendMessage, sendPhoto }   = require('../../services/bot/telegramService');
 const { AdminSettings } = require('../../models');
 
 async function personalityCommand(msg) {
@@ -44,18 +44,31 @@ async function personalityCommand(msg) {
     ? `\n<i>Currently chatting with <b>${current.emoji} ${current.name}</b> — ${current.description}</i>`
     : '';
 
-  await sendMessage(
-    chatId,
-    `✨ <b>Choose a Personality</b>${desc}\n\nSelect who you'd like to talk to:`,
-    {
-      reply_markup: {
-        inline_keyboard: [
-          ...rows,
-          [{ text: '← Back', callback_data: 'action:back' }],
-        ],
-      },
+  const caption = `✨ <b>Choose a Personality</b>${desc}\n\nSelect who you'd like to talk to:`;
+  const replyMarkup = {
+    inline_keyboard: [
+      ...rows,
+      [{ text: '← Back', callback_data: 'action:back' }],
+    ],
+  };
+
+  if (current?.avatarUrls?.image1) {
+    try {
+      await sendPhoto(chatId, current.avatarUrls.image1, {
+        caption,
+        parse_mode: 'HTML',
+        reply_markup: replyMarkup,
+      });
+      return;
+    } catch (err) {
+      // Fallback to sendMessage on error
     }
-  );
+  }
+
+  await sendMessage(chatId, caption, {
+    parse_mode: 'HTML',
+    reply_markup: replyMarkup,
+  });
 }
 
 module.exports = { personalityCommand };
