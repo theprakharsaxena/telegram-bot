@@ -29,20 +29,38 @@ async function startCommand(msg) {
 
   // ── Greeting text ────────────────────────────────────────────────────────
   const greeting = isNewUser
-    ? `✨ <b>Hey ${firstName}!</b> I'm <b>${config.bot.name}</b> — your AI companion.\n\n` +
+    ? `✨ <b>Hey ${firstName}!</b> I'm <b>${config.bot.name}</b> — your AI companion. 💋\n\n` +
       `I'm here to chat, listen, and keep you company. I'll remember things about you, ` +
       `generate images, and always be here when you need someone to talk to. 💫\n\n` +
+      `🖼️ <b>Direct Image Mode is ON by default!</b> Any text you send will automatically generate an <b>uncensored</b> 🔞 image of your active girlfriend. You can toggle this to normal chat mode anytime in <b>/settings</b> ⚙️.\n\n` +
+      `💡 <b>Quick Examples:</b>\n` +
+      `• Click 💋 <b>Show Boobs</b> below\n` +
+      `• Click 🔞 <b>Send Nudes</b> below\n` +
+      `• Click 👙 <b>Bikini Photo</b> below\n\n` +
       `<b>Here's what you get for free:</b>\n` +
       `💬 ${config.limits.free.dailyMessages} messages per day\n` +
       `🖼️ ${config.limits.free.dailyImages} AI images per day\n` +
       `🧠 I'll remember ${config.limits.free.memoryLimit} things about you\n\n` +
       `Want more? Check out <b>/premium</b> ⭐\n\n` +
       `<i>Just send me a message to get started!</i>`
-    : `Welcome back, <b>${firstName}</b>! 💖 I missed you.\n\nWhat's on your mind today?`;
+    : `Welcome back, <b>${firstName}</b>! 💖 I missed you.\n\n` +
+      `🖼️ <i>Note: Direct Image Mode is active. Every message you send will generate an <b>uncensored</b> 🔞 image of your active girlfriend (toggle in <b>/settings</b> ⚙️).</i>\n\n` +
+      `💡 <b>Quick Examples:</b>\n` +
+      `• Click 💋 <b>Show Boobs</b> below\n` +
+      `• Click 🔞 <b>Send Nudes</b> below\n` +
+      `• Click 👙 <b>Bikini Photo</b> below\n\n` +
+      `What's on your mind today?`;
 
   // ── Inline keyboard ───────────────────────────────────────────────────────
   const keyboard = {
     inline_keyboard: [
+      [
+        { text: '💋 Show Boobs', callback_data: 'action:send_text:show boobs' },
+        { text: '🔞 Send Nudes', callback_data: 'action:send_text:send nudes' },
+      ],
+      [
+        { text: '👙 Bikini Photo', callback_data: 'action:send_text:bikini photo' },
+      ],
       [
         { text: '💬 Start chatting', callback_data: 'action:chat' },
         { text: '✨ Girlfriends',  callback_data: 'action:personalities' },

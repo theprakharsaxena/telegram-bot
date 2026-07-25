@@ -25,7 +25,7 @@
  *   18. Trigger image generation if image was requested (async)
  */
 
-const { sendMessage, sendTyping }     = require('../../services/bot/telegramService');
+const { sendMessage, sendTyping, sendUploadPhoto }     = require('../../services/bot/telegramService');
 const { AdminSettings }               = require('../../models');
 const { detectImageRequest }          = require('../../services/ai/imageDetectionService');
 const conversationService             = require('../../services/ai/conversationService');
@@ -358,6 +358,9 @@ async function handleChatMessage(msg) {
               personality,
               userPlan:         plan,
             });
+
+            // Trigger sending a photo chat action status
+            sendUploadPhoto(chatId);
 
             // Send loading/clicking notification to the user
             const loadingMsg = await sendMessage(

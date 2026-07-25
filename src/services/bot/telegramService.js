@@ -111,6 +111,16 @@ function sendTyping(chatId) {
 }
 
 /**
+ * Send an upload photo chat action indicator.
+ */
+function sendUploadPhoto(chatId) {
+  const bot = getBot();
+  bot.sendChatAction(chatId, 'upload_photo').catch((err) => {
+    logger.warn('sendUploadPhoto failed', { chatId, error: err.message });
+  });
+}
+
+/**
  * Send a photo by URL or file_id.
  */
 async function sendPhoto(chatId, photo, options = {}) {
@@ -272,6 +282,7 @@ module.exports = {
   getBot,
   sendMessage,
   sendTyping,
+  sendUploadPhoto,
   sendPhoto,
   editMessage,
   editMessageCaption,

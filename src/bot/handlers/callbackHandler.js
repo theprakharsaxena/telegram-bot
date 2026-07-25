@@ -74,6 +74,18 @@ async function handleCallback(query, ctx) {
 // Generic action handler
 // ---------------------------------------------------------------------------
 async function handleAction(action, chatId, query, ctx) {
+  if (action.startsWith('send_text:')) {
+    const text = action.replace('send_text:', '');
+    const { handleChatMessage } = require('./chatHandler');
+    const syntheticMsg = {
+      chat: { id: chatId },
+      text: text,
+      _ctx: ctx,
+    };
+    await handleChatMessage(syntheticMsg);
+    return;
+  }
+
   switch (action) {
     case 'chat':
       await sendMessage(chatId, "💬 I'm all ears — just send me a message!");
