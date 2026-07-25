@@ -21,6 +21,7 @@ const Subscription   = require('./Subscription');
 const Payment        = require('./Payment');
 const AdminSettings  = require('./AdminSettings');
 const Analytics      = require('./Analytics');
+const Video          = require('./Video');
 
 module.exports = {
   User,
@@ -33,4 +34,5 @@ module.exports = {
   Payment,
   AdminSettings,
   Analytics,
+  Video,
 };

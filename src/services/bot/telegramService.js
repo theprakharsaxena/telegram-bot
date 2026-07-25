@@ -265,6 +265,7 @@ async function setBotCommands() {
     { command: 'memory',      description: '🧠 Manage what she remembers about you' },
     { command: 'reset',       description: '🔄 Clear chat & start a new roleplay' },
     { command: 'images',      description: '🖼️ View your generated hot photos history' },
+    { command: 'videos',      description: '🎬 Uncensored Premium VIP Videos 🔞' },
     { command: 'usage',       description: '📊 Check your daily message & image limits' },
     { command: 'settings',    description: '⚙️ Toggle Direct Image Mode & settings' },
   ];

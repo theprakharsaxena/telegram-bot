@@ -1,0 +1,94 @@
+<%- include('../partials/head', { title: 'Manage Videos' }) %>
+<div class="layout">
+  <%- include('../partials/sidebar') %>
+  <main class="main">
+
+    <div class="page-header">
+      <h1>Premium Videos Gallery</h1>
+      <p>Upload video links and thumbnails for your VIP subscribers</p>
+    </div>
+
+    <!-- Error/Success notifications -->
+    <% if (error) { %>
+      <div style="background: rgba(239, 68, 68, 0.15); border: 1px solid #ef4444; color: #f87171; padding: 12px; border-radius: 8px; margin-bottom: 20px;">
+        ⚠️ <%= error %>
+      </div>
+    <% } %>
+
+    <!-- Add Video Form Card -->
+    <div class="card" style="margin-bottom: 24px;">
+      <div class="card-title">Add New Video</div>
+      <form action="/admin/videos" method="POST" style="display: flex; flex-direction: column; gap: 16px; margin-top: 16px;">
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 16px;">
+          <div>
+            <label style="display: block; font-size: 13px; font-weight: 500; margin-bottom: 6px; color: #a1a1aa;">Video Title</label>
+            <input type="text" name="title" placeholder="e.g. Sarah dancing in lingerie" required style="width: 100%;">
+          </div>
+          <div>
+            <label style="display: block; font-size: 13px; font-weight: 500; margin-bottom: 6px; color: #a1a1aa;">Video Link URL (Direct / Drive / WebPage)</label>
+            <input type="url" name="url" placeholder="https://example.com/premium-video-1" required style="width: 100%;">
+          </div>
+          <div>
+            <label style="display: block; font-size: 13px; font-weight: 500; margin-bottom: 6px; color: #a1a1aa;">Thumbnail Image URL (Blur preview for free tier)</label>
+            <input type="url" name="thumbnailUrl" placeholder="https://example.com/thumbnail-1.jpg" required style="width: 100%;">
+          </div>
+        </div>
+        <button type="submit" class="btn btn-primary" style="align-self: flex-start; padding: 10px 24px;">➕ Save Video</button>
+      </form>
+    </div>
+
+    <!-- Video List Card -->
+    <div class="card">
+      <div class="card-title" style="margin-bottom: 16px;">Uploaded Gallery Videos (<%= videos.length %>)</div>
+      <% if (videos.length === 0) { %>
+        <p style="color: #71717a; font-style: italic; margin-top: 16px;">No gallery videos added yet.</p>
+      <% } else { %>
+        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px;">
+          <% videos.forEach(video => { %>
+            <div style="background: #18181b; border: 1px solid #27272a; border-radius: 8px; overflow: hidden; display: flex; flex-direction: column;">
+              <div style="position: relative; height: 180px; background: #09090b;">
+                <img src="<%= video.thumbnailUrl %>" alt="<%= video.title %>" style="width: 100%; height: 100%; object-fit: cover;">
+                <div style="position: absolute; top: 8px; right: 8px; background: rgba(0, 0, 0, 0.75); padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: bold; color: #fbbf24;">
+                  ⭐ Premium Link
+                </div>
+              </div>
+              <div style="padding: 16px; flex: 1; display: flex; flex-direction: column; justify-content: space-between;">
+                <div>
+                  <h3 style="margin: 0 0 8px 0; font-size: 16px; font-weight: 600; color: #f4f4f5;"><%= video.title %></h3>
+                  <a href="<%= video.url %>" target="_blank" style="font-size: 12px; color: #a78bfa; word-break: break-all; text-decoration: none;"><%= video.url %></a>
+                </div>
+                <div style="margin-top: 16px; display: flex; justify-content: flex-end;">
+                  <button class="btn" style="background: rgba(239,68,68,0.1); border: 1px solid #ef4444; color: #ef4444; padding: 6px 12px; font-size: 13px;" onclick="deleteVideo('<%= video._id %>')">🗑️ Delete</button>
+                </div>
+              </div>
+            </div>
+          <% }) %>
+        </div>
+      <% } %>
+    </div>
+
+  </main>
+</div>
+
+<script>
+async function deleteVideo(id) {
+  if (!confirm('Are you sure you want to delete this video?')) return;
+  try {
+    const res = await fetch('/admin/videos/delete', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ id })
+    });
+    const data = await res.json();
+    if (data.status === 'ok') {
+      window.location.reload();
+    } else {
+      alert(data.message || 'Failed to delete video');
+    }
+  } catch (err) {
+    alert('Error occurred during deletion');
+  }
+}
+</script>

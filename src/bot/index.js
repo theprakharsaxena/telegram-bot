@@ -31,6 +31,7 @@ const { usageCommand }         = require('./commands/usage');
 const { imagesCommand }        = require('./commands/images');
 const { premiumCommand }       = require('./commands/premium');
 const { memoryCommand }        = require('./commands/memory');
+const { videosCommand }        = require('./commands/videos');
 const { handleCallback }       = require('./handlers/callbackHandler');
 const { handleChatMessage }    = require('./handlers/chatHandler');
 const paymentService           = require('../services/payment/paymentService');
@@ -66,6 +67,7 @@ async function initBotHandlers() {
   bot.onText(/\/premium(@\S+)?/, withBotAuth(premiumCommand));
   bot.onText(/\/memory(@\S+)?/,  withBotAuth(memoryCommand));
   bot.onText(/\/images(@\S+)?/,  withBotAuth(imagesCommand));
+  bot.onText(/\/videos(@\S+)?/,  withBotAuth(videosCommand));
 
   // ── Text messages → AI handler ────────────────────────────────────────────
   bot.on('message', (msg) => {

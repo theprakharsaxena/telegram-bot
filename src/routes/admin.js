@@ -90,4 +90,9 @@ router.get('/settings',  adminController.getSettings);
 router.post('/settings', validateUpdateSettings, adminController.updateSettings);
 router.post('/broadcast', validateBroadcast, adminController.broadcastMessage);
 
+// Video gallery routes
+router.get('/videos', adminController.getVideos);
+router.post('/videos', adminController.addVideo);
+router.post('/videos/delete', adminController.deleteVideo);
+
 module.exports = router;

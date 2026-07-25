@@ -9,7 +9,7 @@
 
 const {
   User, Analytics, Payment, Subscription,
-  GeneratedImage, AdminSettings, Message, UsageTracking,
+  GeneratedImage, AdminSettings, Message, UsageTracking, Video
 } = require('../models');
 const { getQueueStats }    = require('../jobs/imageQueue');
 const userService          = require('../services/userService');
@@ -389,6 +389,53 @@ async function updateCredits(req, res) {
   }
 }
 
+async function getVideos(req, res) {
+  try {
+    const videos = await Video.find({}).sort({ createdAt: -1 });
+    res.render('admin/videos', {
+      botName: config.bot.name,
+      page: 'videos',
+      videos,
+      success: null,
+      error: null,
+    });
+  } catch (err) {
+    res.status(500).send(err.message);
+  }
+}
+
+async function addVideo(req, res) {
+  try {
+    const { title, url, thumbnailUrl } = req.body;
+    if (!title || !url || !thumbnailUrl) {
+      throw new Error('All fields are required');
+    }
+    await Video.create({ title, url, thumbnailUrl });
+    
+    // Redirect to list page
+    res.redirect('/admin/videos');
+  } catch (err) {
+    const videos = await Video.find({}).sort({ createdAt: -1 });
+    res.render('admin/videos', {
+      botName: config.bot.name,
+      page: 'videos',
+      videos,
+      success: null,
+      error: err.message,
+    });
+  }
+}
+
+async function deleteVideo(req, res) {
+  try {
+    const { id } = req.body;
+    await Video.findByIdAndDelete(id);
+    res.json({ status: 'ok', message: 'Video deleted successfully' });
+  } catch (err) {
+    res.status(400).json({ status: 'fail', message: err.message });
+  }
+}
+
 module.exports = {
   getOverview,
   getUsers,
@@ -399,4 +446,7 @@ module.exports = {
   updateSettings,
   broadcastMessage,
   updateCredits,
+  getVideos,
+  addVideo,
+  deleteVideo,
 };
