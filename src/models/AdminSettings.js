@@ -116,6 +116,11 @@ const adminSettingsSchema = new mongoose.Schema(
     },
 
     // ── Telegram Stars pricing ────────────────────────────────────────────
+    starsDailyPrice: {
+      type: Number,
+      default: config.stars.dailyPrice,
+      min: 1,
+    },
     starsWeeklyPrice: {
       type: Number,
       default: config.stars.weeklyPrice,

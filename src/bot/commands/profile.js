@@ -51,8 +51,8 @@ async function profileCommand(msg) {
     `✨ Personality: <b>${user.activePersonality}</b>\n\n` +
 
     `<b>📊 Today's Usage</b>\n` +
-    `💬 Messages: ${msgUsed}/${limits.dailyMessages}\n` +
-    `   ${usageBar(msgUsed, limits.dailyMessages)}\n` +
+    `💬 Messages: ${msgUsed}/${isPremium ? 'Unlimited' : limits.dailyMessages}\n` +
+    `   ${isPremium ? '█'.repeat(10) : usageBar(msgUsed, limits.dailyMessages)}\n` +
     `🖼️ Images: ${imgUsed}/${limits.dailyImages}\n` +
     `   ${usageBar(imgUsed, limits.dailyImages)}\n\n` +
 

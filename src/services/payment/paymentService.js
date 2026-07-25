@@ -27,6 +27,7 @@ const AppError  = require('../../utils/AppError');
 
 // Plan definitions — prices come from AdminSettings at runtime
 const PLAN_DURATIONS = {
+  daily:   1,   // days
   weekly:  7,   // days
   monthly: 30,  // days
 };
@@ -44,13 +45,18 @@ const PLAN_DURATIONS = {
  * @param {object} settings   — AdminSettings (for runtime pricing)
  */
 async function createInvoice(user, planType, settings) {
-  if (!['weekly', 'monthly'].includes(planType)) {
+  if (!['daily', 'weekly', 'monthly'].includes(planType)) {
     throw new AppError('Invalid plan type', 400);
   }
 
-  const starsPrice = planType === 'weekly'
-    ? (settings?.starsWeeklyPrice  ?? config.stars.weeklyPrice)
-    : (settings?.starsMonthlyPrice ?? config.stars.monthlyPrice);
+  let starsPrice;
+  if (planType === 'daily') {
+    starsPrice = settings?.starsDailyPrice ?? config.stars.dailyPrice;
+  } else if (planType === 'weekly') {
+    starsPrice = settings?.starsWeeklyPrice ?? config.stars.weeklyPrice;
+  } else {
+    starsPrice = settings?.starsMonthlyPrice ?? config.stars.monthlyPrice;
+  }
 
   // Unique payload — used to match this payment in pre_checkout + successful_payment
   const payload = `plan_${planType}_${user._id}_${Date.now()}`;
@@ -66,7 +72,7 @@ async function createInvoice(user, planType, settings) {
     status:         'pending',
   });
 
-  const planLabel  = planType === 'weekly' ? 'Weekly' : 'Monthly';
+  const planLabel  = planType === 'daily' ? 'Daily' : (planType === 'weekly' ? 'Weekly' : 'Monthly');
   const days       = PLAN_DURATIONS[planType];
 
   try {
@@ -248,7 +254,7 @@ async function handleSuccessfulPayment(msg) {
     }).catch(() => {});
 
     // Notify user
-    const planLabel  = payment.planType === 'weekly' ? 'Weekly' : 'Monthly';
+    const planLabel  = payment.planType === 'daily' ? 'Daily' : (payment.planType === 'weekly' ? 'Weekly' : 'Monthly');
     const expiryDate = subscription.currentPeriodEnd.toLocaleDateString('en-US', {
       year: 'numeric', month: 'long', day: 'numeric',
     });

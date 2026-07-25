@@ -21,7 +21,7 @@ async function handlePaymentCallback(action, query, ctx) {
   const messageId = query.message?.message_id;
 
   // ── Send invoice ───────────────────────────────────────────────────────
-  if (action === 'weekly' || action === 'monthly') {
+  if (action === 'daily' || action === 'weekly' || action === 'monthly') {
     try {
       const settings = await AdminSettings.getSettings();
       await paymentService.createInvoice(user, action, settings);

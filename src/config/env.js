@@ -64,13 +64,14 @@ const envSchema = Joi.object({
   FREE_MEMORY_LIMIT: Joi.number().integer().default(20),
 
   // ── Premium Plan Limits ───────────────────────────────────────────────────
-  PREMIUM_DAILY_MESSAGES: Joi.number().integer().default(500),
-  PREMIUM_DAILY_IMAGES: Joi.number().integer().default(20),
+  PREMIUM_DAILY_MESSAGES: Joi.number().integer().default(999999),
+  PREMIUM_DAILY_IMAGES: Joi.number().integer().default(30),
   PREMIUM_MEMORY_LIMIT: Joi.number().integer().default(200),
 
   // ── Telegram Stars Pricing ────────────────────────────────────────────────
-  STARS_MONTHLY_PRICE: Joi.number().integer().default(299),
-  STARS_WEEKLY_PRICE: Joi.number().integer().default(99),
+  STARS_DAILY_PRICE: Joi.number().integer().default(9),
+  STARS_WEEKLY_PRICE: Joi.number().integer().default(49),
+  STARS_MONTHLY_PRICE: Joi.number().integer().default(149),
 
   // ── Session / Security ────────────────────────────────────────────────────
   SESSION_SECRET: Joi.string().min(32).required(),
@@ -168,8 +169,9 @@ const config = {
   },
 
   stars: {
-    monthlyPrice: envVars.STARS_MONTHLY_PRICE,
+    dailyPrice: envVars.STARS_DAILY_PRICE,
     weeklyPrice: envVars.STARS_WEEKLY_PRICE,
+    monthlyPrice: envVars.STARS_MONTHLY_PRICE,
   },
 
   session: {

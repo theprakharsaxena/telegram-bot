@@ -43,7 +43,7 @@ async function helpCommand(msg) {
 
     `<b>📊 Your Daily Limits</b>\n` +
     (isPremium
-      ? `💬 ${config.limits.premium.dailyMessages} messages\n` +
+      ? `💬 Unlimited chat\n` +
         `🖼️ ${config.limits.premium.dailyImages} images\n` +
         `🧠 ${config.limits.premium.memoryLimit} memories stored\n`
       : `💬 ${config.limits.free.dailyMessages} messages\n` +

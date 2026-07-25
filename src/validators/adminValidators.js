@@ -65,6 +65,7 @@ const updateSettingsSchema = Joi.object({
   premiumDailyMessages:   Joi.number().integer().min(1).max(100000),
   premiumDailyImages:     Joi.number().integer().min(0).max(10000),
   premiumMemoryLimit:     Joi.number().integer().min(0).max(10000),
+  starsDailyPrice:        Joi.number().integer().min(1).max(100000),
   starsWeeklyPrice:       Joi.number().integer().min(1).max(100000),
   starsMonthlyPrice:      Joi.number().integer().min(1).max(100000),
   aiModel:                Joi.string().max(128), // allow any Novita model string

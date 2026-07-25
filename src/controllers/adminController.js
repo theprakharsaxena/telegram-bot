@@ -236,7 +236,7 @@ async function updateSettings(req, res) {
       imageGenerationEnabled, memoryEnabled, newUsersEnabled,
       freeDailyMessages, freeDailyImages, freeMemoryLimit,
       premiumDailyMessages, premiumDailyImages, premiumMemoryLimit,
-      starsWeeklyPrice, starsMonthlyPrice,
+      starsDailyPrice, starsWeeklyPrice, starsMonthlyPrice,
       aiModel, aiTemperature, aiMaxTokens,
       summaryThreshold, contextWindowSize,
     } = req.body;
@@ -257,6 +257,7 @@ async function updateSettings(req, res) {
     if (premiumDailyImages)   settings.premiumLimits.dailyImages   = parseInt(premiumDailyImages);
     if (premiumMemoryLimit)   settings.premiumLimits.memoryLimit   = parseInt(premiumMemoryLimit);
 
+    if (starsDailyPrice)    settings.starsDailyPrice   = parseInt(starsDailyPrice);
     if (starsWeeklyPrice)   settings.starsWeeklyPrice  = parseInt(starsWeeklyPrice);
     if (starsMonthlyPrice)  settings.starsMonthlyPrice = parseInt(starsMonthlyPrice);
 

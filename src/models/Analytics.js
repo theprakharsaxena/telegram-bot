@@ -51,6 +51,7 @@ const analyticsSchema = new mongoose.Schema(
     // ── Revenue stats ─────────────────────────────────────────────────────
     paymentsCompleted: { type: Number, default: 0 },
     totalStarsEarned: { type: Number, default: 0 },
+    dailySubscriptionsSold: { type: Number, default: 0 },
     weeklySubscriptionsSold: { type: Number, default: 0 },
     monthlySubscriptionsSold: { type: Number, default: 0 },
     subscriptionsExpired: { type: Number, default: 0 },

@@ -289,7 +289,7 @@ async function handleChatMessage(msg) {
           chatId,
           `⚠️ That was your last free message for today!\n\n` +
           `Your limit resets at midnight UTC. ` +
-          `Upgrade to Premium with /premium for ${config.limits.premium.dailyMessages} messages/day! ⭐`
+          `Upgrade to Premium with /premium for Unlimited chat! ⭐`
         ).catch(() => {});
       });
     }

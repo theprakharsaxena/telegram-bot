@@ -52,13 +52,16 @@ async function usageCommand(msg) {
     ? `  ⚠️ Nearly at limit!`
     : '';
 
+  const msgLimitLabel = isPremium ? 'Unlimited' : msgLimit;
+  const msgWarningText = isPremium ? '' : msgWarning;
+
   const planBadge = isPremium ? '⭐ Premium' : '🆓 Free';
 
   const text =
     `📊 <b>Today's Usage</b>  ·  ${planBadge}\n\n` +
 
-    `💬 <b>Messages</b>  ${msgUsed}/${msgLimit}${msgWarning}\n` +
-    `${bar(msgUsed, msgLimit)}\n\n` +
+    `💬 <b>Messages</b>  ${msgUsed}/${msgLimitLabel}${msgWarningText}\n` +
+    `${isPremium ? '🟩'.repeat(12) : bar(msgUsed, msgLimit)}\n\n` +
 
     `🖼️ <b>Images</b>  ${imgUsed}/${imgLimit}${imgWarning}\n` +
     `${bar(imgUsed, imgLimit)}\n\n` +
@@ -67,7 +70,7 @@ async function usageCommand(msg) {
 
     (!isPremium
       ? `\n` +
-        `⭐ <b>Go Premium</b> for ${config.limits.premium.dailyMessages} msgs/day ` +
+        `⭐ <b>Go Premium</b> for Unlimited chat ` +
         `and ${config.limits.premium.dailyImages} images/day → /premium`
       : `\n✨ Enjoying your premium benefits!`);
 
