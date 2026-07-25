@@ -48,9 +48,9 @@ async function premiumCommand(msg) {
       `Expires: <b>${expiryDate}</b> (${daysLeft} day${daysLeft !== 1 ? 's' : ''} left)\n\n` +
       `<b>Your benefits:</b>\n` +
       `💬 Unlimited chat\n` +
-      `🖼️ ${config.limits.premium.dailyImages} images/day\n` +
+      `🖼️ ${config.limits.premium.dailyImages} uncensored 🔞 images/day\n` +
       `🧠 ${config.limits.premium.memoryLimit} long-term memories\n` +
-      `🔒 All exclusive personalities\n\n` +
+      `🔒 Access to all girlfriends including exclusive VIP companions\n\n` +
       `Want to renew early or switch plans? Tap below:`,
       {
         reply_markup: {
@@ -85,32 +85,32 @@ async function premiumCommand(msg) {
 
   await sendMessage(
     chatId,
-    `⭐ <b>Upgrade to Premium</b>\n\n` +
-    `Unlock the full ${config.bot.name} experience:\n\n` +
-    `💬 <b>Unlimited chat</b> (vs ${config.limits.free.dailyMessages} free/day)\n` +
-    `🖼️ <b>${config.limits.premium.dailyImages} images/day</b> (vs ${config.limits.free.dailyImages} free/day)\n` +
-    `🧠 <b>${config.limits.premium.memoryLimit} long-term memories</b>\n` +
-    `✨ <b>All personalities</b> including exclusive ones\n` +
-    `⚡ <b>Priority responses</b>\n\n` +
-    `<b>Choose your plan:</b>`,
+    `🔥 <b>Get VIP Premium Pass</b> 🔥\n\n` +
+    `Unlock the absolute ultimate experience with your girlfriends:\n\n` +
+    `💬 <b>Unlimited dirty chat & roleplay</b> 💋\n` +
+    `🖼️ <b>30 Uncensored 🔞 images per day</b> (vs 3 free/day)\n` +
+    `🧠 <b>Deep memory tracking</b> — she remembers your desires!\n` +
+    `✨ <b>Unlock all hot & exclusive girlfriends</b> 👙\n` +
+    `⚡ <b>Priority instant responses</b> — zero delays!\n\n` +
+    `<b>Choose your VIP plan:</b>`,
     {
       reply_markup: {
         inline_keyboard: [
           [
             {
-              text: `⚡ 1 Day — ${dailyPrice} ⭐`,
+              text: `⚡ 1 Day VIP Access — ${dailyPrice} ⭐`,
               callback_data: 'payment:daily',
             },
           ],
           [
             {
-              text: `📅 7 Days — ${weeklyPrice} ⭐ ${weeklySavings > 0 ? `(save ${weeklySavings}%)` : ''}`,
+              text: `📅 7 Days VIP Access — ${weeklyPrice} ⭐ ${weeklySavings > 0 ? `(save ${weeklySavings}%)` : ''}`,
               callback_data: 'payment:weekly',
             },
           ],
           [
             {
-              text: `🗓️ 30 Days — ${monthlyPrice} ⭐ ${monthlySavings > 0 ? `(save ${monthlySavings}%)` : ''}`,
+              text: `🗓️ 30 Days VIP Access — ${monthlyPrice} ⭐ ${monthlySavings > 0 ? `(save ${monthlySavings}%)` : ''}`,
               callback_data: 'payment:monthly',
             },
           ],

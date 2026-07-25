@@ -618,6 +618,12 @@ adminSettingsSchema.statics.getSettings = async function () {
       };
       await settings.save();
     }
+    if (settings.starsDailyPrice !== 9 || settings.starsWeeklyPrice !== 49 || settings.starsMonthlyPrice !== 149) {
+      settings.starsDailyPrice = 9;
+      settings.starsWeeklyPrice = 49;
+      settings.starsMonthlyPrice = 149;
+      await settings.save();
+    }
   }
   return settings;
 };
