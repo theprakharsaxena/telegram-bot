@@ -12,7 +12,7 @@ const NEGATIVE_PROMPT =
   'low quality, watermark, text, logo, duplicate, morbid, mutilated, ' +
   'extra limbs, poorly drawn face, mutation, disfigured, bad anatomy';
 
-const EXPLICIT_WORDS = /\b(nude|naked|underwear|bikini|lingerie|panties|bra|ass|boobs|boobies|breasts|tits|pussy|vagina|cunt|nipples|clit|bottomless|sex|sexy|sensual|explicit|nsfw|seductive|revealing|boudoir|cleavage|hot|erotic|porn|xxx|butt)\b/i;
+const EXPLICIT_WORDS = /\b(nude|naked|underwear|bikini|lingerie|panties|bra|ass|boobs|boobies|breasts|tits|pussy|vagina|cunt|nipples|clit|clitoris|bottomless|sex|sexy|sensual|explicit|nsfw|seductive|revealing|boudoir|cleavage|hot|erotic|porn|xxx|butt|thong|stockings|panties|g-string|tanga|bralette|babydoll|negligee|topless|nacked|nakedness|nudity|nakedly|undressed|strip|stripping|naughty|hump|fuck|masturbate|orgasm|erogenous|fetish|kinky|bdsm|bondage|erotica|seduce|seducing|lust|horny|aroused|sensually|erotical|voluptuous|peekaboo)\b/i;
 
 /**
  * Build the prompt format for the image generator.

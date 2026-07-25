@@ -36,9 +36,9 @@ const EXPLICIT_PATTERNS = [
   /\bsend\s+(a\s+)?(pic|photo|image|selfie)\b/i,
   // "what do you look like" (reasonable to generate an image)
   /\bwhat\s+do\s+you\s+look\s+like\b/i,
-  // Suggestive/NSFW requests (ONLY female anatomy)
-  /\b(send|show|give|share)\s+(me\s+)?(your\s+)?(boobs|boobies|breasts|tits|pussy|pussycat|vagina|cunt|lips|nipples|clit|clitoris|bottomless|nude|nudes|naked|underwear|bikini|lingerie|panties|bra|ass|sex)\b/i,
-  /\b(send|show|give|share)\s+(boobs|boobies|breasts|tits|pussy|pussycat|vagina|cunt|lips|nipples|clit|clitoris|bottomless|nude|nudes|naked|underwear|bikini|lingerie|panties|bra|ass|sex)\b/i,
+  // Suggestive/NSFW requests (Female anatomy, clothing, actions, slang)
+  /\b(send|show|give|share)\s+(me\s+)?(your\s+)?(boobs|boobies|breasts|tits|pussy|pussycat|vagina|cunt|lips|nipples|clit|clitoris|bottomless|nude|nudes|naked|underwear|bikini|lingerie|panties|bra|ass|sex|thong|stockings|g-string|tanga|bralette|babydoll|negligee|topless|nacked|nakedness|nudity|undressed|strip|stripping|naughty|hump|fuck|masturbate|orgasm|erogenous|fetish|kinky|bdsm|bondage|erotica|seduce|seducing|lust|horny|aroused|voluptuous|peekaboo)\b/i,
+  /\b(send|show|give|share)\s+(boobs|boobies|breasts|tits|pussy|pussycat|vagina|cunt|lips|nipples|clit|clitoris|bottomless|nude|nudes|naked|underwear|bikini|lingerie|panties|bra|ass|sex|thong|stockings|g-string|tanga|bralette|babydoll|negligee|topless|nacked|nakedness|nudity|undressed|strip|stripping|naughty|hump|fuck|masturbate|orgasm|erogenous|fetish|kinky|bdsm|bondage|erotica|seduce|seducing|lust|horny|aroused|voluptuous|peekaboo)\b/i,
 ];
 
 // ---------------------------------------------------------------------------
