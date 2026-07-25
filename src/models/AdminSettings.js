@@ -611,6 +611,13 @@ adminSettingsSchema.statics.getSettings = async function () {
       settings.personalities = this.schema.paths.personalities.options.default();
       await settings.save();
     }
+    if (!settings.premiumLimits || settings.premiumLimits.dailyImages !== 30) {
+      settings.premiumLimits = {
+        ...settings.premiumLimits?.toObject(),
+        dailyImages: 30
+      };
+      await settings.save();
+    }
   }
   return settings;
 };
