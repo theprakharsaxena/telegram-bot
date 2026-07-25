@@ -71,6 +71,18 @@ async function premiumCommand(msg) {
   }
 
   // ── Free user — show upgrade options ──────────────────────────────────
+  const dailyPriceRate = dailyPrice;
+  const weeklyPriceRate = weeklyPrice / 7;
+  const monthlyPriceRate = monthlyPrice / 30;
+
+  const weeklySavings = dailyPriceRate > 0
+    ? Math.round((1 - weeklyPriceRate / dailyPriceRate) * 100)
+    : 0;
+
+  const monthlySavings = dailyPriceRate > 0
+    ? Math.round((1 - monthlyPriceRate / dailyPriceRate) * 100)
+    : 0;
+
   await sendMessage(
     chatId,
     `⭐ <b>Upgrade to Premium</b>\n\n` +
@@ -92,13 +104,13 @@ async function premiumCommand(msg) {
           ],
           [
             {
-              text: `📅 7 Days — ${weeklyPrice} ⭐`,
+              text: `📅 7 Days — ${weeklyPrice} ⭐ ${weeklySavings > 0 ? `(save ${weeklySavings}%)` : ''}`,
               callback_data: 'payment:weekly',
             },
           ],
           [
             {
-              text: `🗓️ 30 Days — ${monthlyPrice} ⭐`,
+              text: `🗓️ 30 Days — ${monthlyPrice} ⭐ ${monthlySavings > 0 ? `(save ${monthlySavings}%)` : ''}`,
               callback_data: 'payment:monthly',
             },
           ],
