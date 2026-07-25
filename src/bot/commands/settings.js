@@ -26,7 +26,6 @@ function buildSettingsText(prefs) {
   return (
     `⚙️ <b>Your Settings</b>\n\n` +
     `Tap any option below to change it.\n\n` +
-    `🗣 Response style: <b>${capitalize(prefs.responseStyle)}</b>\n` +
     `🧠 Memory: <b>${prefs.memoryEnabled ? 'On' : 'Off'}</b>\n` +
     `🔔 Notifications: <b>${prefs.notificationsEnabled ? 'On' : 'Off'}</b>\n` +
     `🖼️ Direct Image Mode: <b>${prefs.directImageMode ? 'On' : 'Off'}</b>`
@@ -39,12 +38,6 @@ function buildSettingsText(prefs) {
 function buildSettingsKeyboard(prefs) {
   return {
     inline_keyboard: [
-      [
-        {
-          text: `🗣 Style: ${capitalize(prefs.responseStyle)}`,
-          callback_data: 'settings:style_menu',
-        },
-      ],
       [
         {
           text: `🧠 Long-term memory: ${prefs.memoryEnabled ? '✅ On' : '❌ Off'}`,
