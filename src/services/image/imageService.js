@@ -79,8 +79,16 @@ async function generateImageWithFal(prompt, width = 1024, height = 1024) {
           `https://queue.fal.run/fal-ai/sana/requests/${requestId}`
         );
 
-        if (resultResponse.data.images?.[0]?.url) {
-          imageUrl = resultResponse.data.images[0].url;
+        const resultData = resultResponse.data;
+        const hasNSFW = resultData?.has_nsfw_concepts && resultData.has_nsfw_concepts.includes(true);
+
+        if (hasNSFW) {
+          logger.warn("Fal AI generated image has NSFW concepts, throwing fallback indicator");
+          throw new Error("NSFW_DETECTED_BY_FAL");
+        }
+
+        if (resultData.images?.[0]?.url) {
+          imageUrl = resultData.images[0].url;
           logger.info("Image generated successfully with fal.ai");
           break;
         }
@@ -206,7 +214,18 @@ async function processImageGeneration(jobData) {
       logger.info('Default prompt, routing to Fal AI (Sana)', { telegramId, userPrompt });
       imageRecord.model = 'fal-ai/sana';
       await imageRecord.save();
-      imageUrl = await generateImageWithFal(enhancedPrompt);
+      try {
+        imageUrl = await generateImageWithFal(enhancedPrompt);
+      } catch (falErr) {
+        if (falErr.message.includes("NSFW_DETECTED_BY_FAL")) {
+          logger.warn("Fal AI generated image has NSFW content. Automatically falling back to Runware AI.", { telegramId, userPrompt });
+          imageRecord.model = 'runware-civitai:573152@638929';
+          await imageRecord.save();
+          imageUrl = await generateImageWithRunware(enhancedPrompt);
+        } else {
+          throw falErr;
+        }
+      }
     }
 
     if (loadingMessageId) {
