@@ -443,11 +443,12 @@ async function getUserMessages(req, res) {
     if (isNaN(telegramId)) {
       throw new Error('Invalid Telegram ID');
     }
-    const messages = await Message.find({ telegramId })
-      .sort({ createdAt: 1 })
+    // Fetch last 100 active (unhidden) messages sorted by newest first, then reverse for chronological rendering
+    const messages = await Message.find({ telegramId, isHidden: { $ne: true } })
+      .sort({ createdAt: -1 })
       .limit(100)
       .lean();
-    return res.json({ status: 'ok', messages });
+    return res.json({ status: 'ok', messages: messages.reverse() });
   } catch (err) {
     return res.status(400).json({ status: 'fail', message: err.message });
   }
