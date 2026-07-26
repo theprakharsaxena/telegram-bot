@@ -82,6 +82,7 @@ router.use(requireAdminAuth);
 
 router.get('/',          adminController.getOverview);
 router.get('/users',     adminController.getUsers);
+router.get('/users/:telegramId/messages', adminController.getUserMessages);
 router.post('/users/ban',   validateBanUser,    adminController.banUser);
 router.post('/users/unban', validateUnbanUser,  adminController.unbanUser);
 router.post('/users/update-credits', adminController.updateCredits);

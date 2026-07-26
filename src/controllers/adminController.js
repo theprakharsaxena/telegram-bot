@@ -436,6 +436,22 @@ async function deleteVideo(req, res) {
   }
 }
 
+async function getUserMessages(req, res) {
+  try {
+    const telegramId = parseInt(req.params.telegramId);
+    if (isNaN(telegramId)) {
+      throw new Error('Invalid Telegram ID');
+    }
+    const messages = await Message.find({ telegramId })
+      .sort({ createdAt: 1 })
+      .limit(100)
+      .lean();
+    return res.json({ status: 'ok', messages });
+  } catch (err) {
+    return res.status(400).json({ status: 'fail', message: err.message });
+  }
+}
+
 module.exports = {
   getOverview,
   getUsers,
@@ -449,4 +465,5 @@ module.exports = {
   getVideos,
   addVideo,
   deleteVideo,
+  getUserMessages,
 };

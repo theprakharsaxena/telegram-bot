@@ -29,6 +29,7 @@
             <th>User</th>
             <th>Telegram ID</th>
             <th>Plan</th>
+            <th>Stats</th>
             <th>Joined</th>
             <th>Last Active</th>
             <th>Status</th>
@@ -53,6 +54,10 @@
                   <%= u.plan %>
                 </span>
               </td>
+              <td>
+                💬 <b><%= u.stats?.totalMessages || 0 %></b> msgs<br>
+                🖼️ <b><%= u.stats?.totalImages || 0 %></b> imgs
+              </td>
               <td class="text-muted"><%= new Date(u.createdAt).toLocaleDateString() %></td>
               <td class="text-muted">
                 <%= u.stats?.lastActiveAt ? new Date(u.stats.lastActiveAt).toLocaleDateString() : '—' %>
@@ -73,6 +78,10 @@
                         onclick="handleCreditsClick(this)">
                   Credits
                 </button>
+                <button class="btn btn-ghost btn-sm" style="margin-right: 4px;"
+                        onclick="showChatHistory('<%= u.telegramId %>', '<%= u.firstName || u.username || u.telegramId %>')">
+                  💬 Chat
+                </button>
                 <% if (u.isBanned) { %>
                   <button class="btn btn-ghost btn-sm"
                           onclick="adminAction('/admin/users/unban', { telegramId: '<%= u.telegramId %>' })">
@@ -88,7 +97,7 @@
             </tr>
           <% }) %>
           <% if (users.length === 0) { %>
-            <tr><td colspan="7" class="text-muted" style="text-align:center; padding:32px;">No users found.</td></tr>
+            <tr><td colspan="8" class="text-muted" style="text-align:center; padding:32px;">No users found.</td></tr>
           <% } %>
         </tbody>
       </table>
@@ -134,11 +143,97 @@
   </div>
 </div>
 
+<div id="chat-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); align-items:center; justify-content:center; z-index:1000;">
+  <div class="card" style="width:100%; max-width:600px; height:80%; display:flex; flex-direction:column; padding:24px; position:relative; background:#1a1a2e; border:1px solid #2d2d44; border-radius:10px;">
+    <h3 style="margin-bottom:8px; color:#a78bfa;" id="chat-modal-title">Chat Log</h3>
+    <p id="chat-modal-subtitle" style="font-size:12px; color:#94a3b8; margin-bottom:16px;"></p>
+    
+    <div id="chat-modal-body" style="flex:1; overflow-y:auto; background:#111122; border:1px solid #2d2d44; padding:16px; border-radius:6px; display:flex; flex-direction:column; gap:12px; margin-bottom:16px;">
+      <!-- Message bubbles injected here -->
+    </div>
+    
+    <div style="display:flex; justify-content:flex-end;">
+      <button class="btn btn-ghost" onclick="closeChatModal()">Close</button>
+    </div>
+  </div>
+</div>
+
 <div id="toast" style="display:none; position:fixed; bottom:24px; right:24px;
      background:#1a1a2e; border:1px solid #2d2d44; padding:12px 20px;
      border-radius:8px; font-size:14px; z-index:9999;"></div>
 
 <script>
+async function showChatHistory(telegramId, name) {
+  document.getElementById('chat-modal-title').textContent = 'Chat Log: ' + name;
+  document.getElementById('chat-modal-subtitle').textContent = 'Telegram ID: ' + telegramId;
+  const container = document.getElementById('chat-modal-body');
+  container.innerHTML = '<p class="text-muted" style="text-align:center;">Loading messages...</p>';
+  document.getElementById('chat-modal').style.display = 'flex';
+  
+  try {
+    const res = await fetch(`/admin/users/${telegramId}/messages`);
+    const data = await res.json();
+    if (data.status === 'ok') {
+      if (data.messages.length === 0) {
+        container.innerHTML = '<p class="text-muted" style="text-align:center;">No messages found in history.</p>';
+      } else {
+        container.innerHTML = '';
+        data.messages.forEach(m => {
+          const bubble = document.createElement('div');
+          const isUser = m.role === 'user';
+          bubble.style.maxWidth = '85%';
+          bubble.style.padding = '10px 14px';
+          bubble.style.borderRadius = '8px';
+          bubble.style.fontSize = '13px';
+          bubble.style.lineHeight = '1.4';
+          bubble.style.wordBreak = 'break-word';
+          
+          if (isUser) {
+            bubble.style.alignSelf = 'flex-end';
+            bubble.style.background = '#4c1d95'; // Purple bubble for user
+            bubble.style.color = '#f5f3ff';
+          } else {
+            bubble.style.alignSelf = 'flex-start';
+            bubble.style.background = '#1e293b'; // Slate bubble for bot
+            bubble.style.color = '#f1f5f9';
+          }
+          
+          const label = document.createElement('div');
+          label.style.fontWeight = 'bold';
+          label.style.fontSize = '10px';
+          label.style.marginBottom = '4px';
+          label.style.color = isUser ? '#c084fc' : '#94a3b8';
+          label.textContent = isUser ? 'USER' : 'ASSISTANT';
+          
+          const text = document.createElement('div');
+          text.textContent = m.content;
+          
+          const time = document.createElement('div');
+          time.style.fontSize = '9px';
+          time.style.color = isUser ? '#d8b4fe' : '#64748b';
+          time.style.marginTop = '4px';
+          time.style.textAlign = 'right';
+          time.textContent = new Date(m.createdAt).toLocaleTimeString();
+          
+          bubble.appendChild(label);
+          bubble.appendChild(text);
+          bubble.appendChild(time);
+          container.appendChild(bubble);
+        });
+        // Scroll to bottom
+        container.scrollTop = container.scrollHeight;
+      }
+    } else {
+      container.innerHTML = '<p style="color:#f87171; text-align:center;">Error: ' + (data.message || 'Failed to load messages') + '</p>';
+    }
+  } catch (err) {
+    container.innerHTML = '<p style="color:#f87171; text-align:center;">Request failed</p>';
+  }
+}
+
+function closeChatModal() {
+  document.getElementById('chat-modal').style.display = 'none';
+}
 async function adminAction(url, body) {
   if (!confirm('Are you sure?')) return;
   try {
