@@ -223,6 +223,15 @@ async function maybeSummarise(conversation, settings, summariseFn) {
     const lastSummarisedIndex =
       messagesToSummarise[messagesToSummarise.length - 1].sequenceIndex;
 
+    // Delete summarized messages from database to keep DB clean
+    const deleteResult = await Message.deleteMany({
+      conversationId: conversation._id,
+      sequenceIndex: {
+        $gt: conversation.summarisedUpToMessageIndex || 0,
+        $lte: lastSummarisedIndex,
+      },
+    });
+
     await Conversation.findByIdAndUpdate(conversation._id, {
       $set: {
         summary: newSummary,
@@ -232,17 +241,64 @@ async function maybeSummarise(conversation, settings, summariseFn) {
     });
 
     await invalidateContextCache(conversation._id);
-    logger.info('Conversation summarised', {
+    logger.info('Conversation summarised and old messages deleted', {
       conversationId: conversation._id,
       summaryLength: newSummary.length,
+      deletedCount: deleteResult.deletedCount,
     });
 
     return true;
   } catch (err) {
-    logger.error('Summarisation failed', {
+    logger.error('Summarisation failed, fallback to pruning messages anyway', {
       conversationId: conversation._id,
       error: err.message,
     });
+
+    try {
+      // Re-fetch the message metadata we want to delete (everything up to last 10)
+      const messagesToPrune = await Message.find(
+        {
+          conversationId: conversation._id,
+          isHidden: false,
+          sequenceIndex: {
+            $gt: conversation.summarisedUpToMessageIndex || 0,
+            $lte: conversation.messageCount - 10,
+          },
+        },
+        { sequenceIndex: 1 }
+      )
+        .sort({ sequenceIndex: 1 })
+        .lean();
+
+      if (messagesToPrune.length > 0) {
+        const lastPrunedIndex = messagesToPrune[messagesToPrune.length - 1].sequenceIndex;
+
+        // Force delete these from the database to keep storage clean
+        const deleteResult = await Message.deleteMany({
+          conversationId: conversation._id,
+          sequenceIndex: {
+            $gt: conversation.summarisedUpToMessageIndex || 0,
+            $lte: lastPrunedIndex,
+          },
+        });
+
+        // Set the summarised index up to this point so they are never fetched in context again
+        await Conversation.findByIdAndUpdate(conversation._id, {
+          $set: {
+            summarisedUpToMessageIndex: lastPrunedIndex,
+          },
+        });
+
+        await invalidateContextCache(conversation._id);
+        logger.info('Pruned old messages without updated summary due to API failure', {
+          conversationId: conversation._id,
+          deletedCount: deleteResult.deletedCount,
+        });
+      }
+    } catch (pruneErr) {
+      logger.error('Pruning fallback failed', { error: pruneErr.message });
+    }
+
     return false;
   }
 }
