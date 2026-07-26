@@ -214,11 +214,8 @@ async function resetConversation(telegramId, personality = null) {
   });
 
   if (conversation) {
-    // Hide all messages in the conversation (soft delete)
-    await Message.updateMany(
-      { conversationId: conversation._id },
-      { $set: { isHidden: true, hiddenReason: 'User reset conversation' } }
-    );
+    // Permanently delete all messages in the conversation
+    await Message.deleteMany({ conversationId: conversation._id });
     conversation.isActive = false;
     await conversation.save();
   }
