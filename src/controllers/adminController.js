@@ -238,7 +238,7 @@ async function updateSettings(req, res) {
       premiumDailyMessages, premiumDailyImages, premiumMemoryLimit,
       starsDailyPrice, starsWeeklyPrice, starsMonthlyPrice,
       aiModel, aiTemperature, aiMaxTokens,
-      summaryThreshold, contextWindowSize,
+      summaryThreshold, contextWindowSize, pruneMessagesAfterSummary,
     } = req.body;
 
     const settings = await AdminSettings.getSettings();
@@ -249,6 +249,7 @@ async function updateSettings(req, res) {
     if (imageGenerationEnabled !== undefined) settings.imageGenerationEnabled = imageGenerationEnabled === 'true';
     if (memoryEnabled !== undefined)        settings.memoryEnabled        = memoryEnabled === 'true';
     if (newUsersEnabled !== undefined)      settings.newUsersEnabled      = newUsersEnabled === 'true';
+    if (pruneMessagesAfterSummary !== undefined) settings.pruneMessagesAfterSummary = pruneMessagesAfterSummary === 'true';
 
     if (freeDailyMessages)  settings.freeLimits.dailyMessages    = parseInt(freeDailyMessages);
     if (freeDailyImages)    settings.freeLimits.dailyImages      = parseInt(freeDailyImages);

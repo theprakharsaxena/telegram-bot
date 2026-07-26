@@ -138,6 +138,8 @@ const adminSettingsSchema = new mongoose.Schema(
     aiMaxTokens: { type: Number, default: 2048, min: 1 },
     // Number of messages before conversation gets summarised
     summaryThreshold: { type: Number, default: 40, min: 10 },
+    // Whether to delete the messages from database after summarisation/pruning
+    pruneMessagesAfterSummary: { type: Boolean, default: true },
     // Number of recent messages included in context window
     contextWindowSize: { type: Number, default: 20, min: 5 },
     // How often (in messages) to extract new memories

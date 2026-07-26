@@ -138,6 +138,13 @@
             <label>Summarisation Threshold (messages)</label>
             <input type="number" name="summaryThreshold" value="<%= settings.summaryThreshold %>" min="10" max="100">
           </div>
+          <div class="form-group">
+            <label>Auto-Delete Chats after Summarisation</label>
+            <select name="pruneMessagesAfterSummary">
+              <option value="true"  <%= settings.pruneMessagesAfterSummary !== false ? 'selected' : '' %>>On — Auto-delete old chats</option>
+              <option value="false" <%= settings.pruneMessagesAfterSummary === false  ? 'selected' : '' %>>Off — Keep all messages in DB</option>
+            </select>
+          </div>
         </div>
       </div>
 

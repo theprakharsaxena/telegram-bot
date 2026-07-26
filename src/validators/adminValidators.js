@@ -73,6 +73,7 @@ const updateSettingsSchema = Joi.object({
   aiMaxTokens:            Joi.number().integer().min(100).max(4096),
   contextWindowSize:      Joi.number().integer().min(5).max(50),
   summaryThreshold:       Joi.number().integer().min(10).max(200),
+  pruneMessagesAfterSummary: Joi.string().valid('true', 'false'),
 });
 
 const broadcastSchema = Joi.object({
