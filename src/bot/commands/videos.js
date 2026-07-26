@@ -45,7 +45,7 @@ async function videosCommand(msg) {
                            `⚠️ <i>This explicit uncensored video is only available for VIP members!</i>`;
 
         // Dynamically blur the original thumbnail image using wsrv.nl proxy so it's the exact same image but blurred
-        const previewImage = `https://wsrv.nl/?url=${encodeURIComponent(video.thumbnailUrl)}&blur=10`;
+        const previewImage = `https://wsrv.nl/?url=${encodeURIComponent(video.thumbnailUrl)}&blur=20`;
 
         const replyMarkup = {
           inline_keyboard: [
