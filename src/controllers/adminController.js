@@ -454,6 +454,60 @@ async function getUserMessages(req, res) {
   }
 }
 
+async function getGeneratedImages(req, res) {
+  try {
+    const page        = parseInt(req.query.page) || 1;
+    const limit       = 24; // image grid — 24 per page
+    const skip        = (page - 1) * limit;
+    const statusFilter = req.query.status || '';
+    const search      = (req.query.search || '').trim();
+
+    const filter = {};
+    if (statusFilter) filter.status = statusFilter;
+
+    // If searching by telegramId
+    if (search && /^\d+$/.test(search)) {
+      filter.telegramId = parseInt(search);
+    }
+
+    const [images, total] = await Promise.all([
+      GeneratedImage.find(filter)
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limit)
+        .lean(),
+      GeneratedImage.countDocuments(filter),
+    ]);
+
+    // Attach user display names
+    const telegramIds = [...new Set(images.map((i) => i.telegramId))];
+    const users = await User.find(
+      { telegramId: { $in: telegramIds } },
+      { telegramId: 1, firstName: 1, username: 1 }
+    ).lean();
+    const userMap = {};
+    users.forEach((u) => { userMap[u.telegramId] = u; });
+
+    const imagesWithUsers = images.map((img) => ({
+      ...img,
+      user: userMap[img.telegramId] || null,
+    }));
+
+    res.render('admin/generated_images', {
+      page:         'generated_images',
+      images:       imagesWithUsers,
+      total,
+      currentPage:  page,
+      totalPages:   Math.ceil(total / limit),
+      statusFilter,
+      search,
+    });
+  } catch (err) {
+    logger.error('getGeneratedImages error', { error: err.message });
+    res.status(500).render('admin/error', { message: err.message });
+  }
+}
+
 module.exports = {
   getOverview,
   getUsers,
@@ -468,4 +522,5 @@ module.exports = {
   addVideo,
   deleteVideo,
   getUserMessages,
+  getGeneratedImages,
 };

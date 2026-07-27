@@ -96,4 +96,7 @@ router.get('/videos', adminController.getVideos);
 router.post('/videos', adminController.addVideo);
 router.post('/videos/delete', adminController.deleteVideo);
 
+// Generated images gallery
+router.get('/generated-images', adminController.getGeneratedImages);
+
 module.exports = router;

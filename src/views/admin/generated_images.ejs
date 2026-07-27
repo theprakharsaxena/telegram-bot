@@ -1,0 +1,149 @@
+<%- include('../partials/head', { title: 'Generated Images' }) %>
+<div class="layout">
+  <%- include('../partials/sidebar') %>
+  <main class="main">
+
+    <div class="page-header">
+      <h1>Generated Images</h1>
+      <p><%= total.toLocaleString() %> total images generated</p>
+    </div>
+
+    <!-- Filters -->
+    <div class="card" style="margin-bottom:20px;">
+      <form method="GET" action="/admin/generated-images" style="display:flex; gap:12px; flex-wrap:wrap; align-items:flex-end;">
+        <div style="flex:1; min-width:180px;">
+          <label style="display:block; font-size:12px; color:#94a3b8; margin-bottom:4px;">Search Telegram ID</label>
+          <input type="text" name="search" placeholder="e.g. 123456789" value="<%= search %>" style="width:100%;">
+        </div>
+        <div style="width:160px;">
+          <label style="display:block; font-size:12px; color:#94a3b8; margin-bottom:4px;">Status</label>
+          <select name="status" style="width:100%;">
+            <option value="">All statuses</option>
+            <option value="succeeded" <%= statusFilter === 'succeeded' ? 'selected' : '' %>>✅ Succeeded</option>
+            <option value="failed"    <%= statusFilter === 'failed'    ? 'selected' : '' %>>❌ Failed</option>
+            <option value="pending"   <%= statusFilter === 'pending'   ? 'selected' : '' %>>⏳ Pending</option>
+            <option value="processing"<%= statusFilter === 'processing'? 'selected' : '' %>>🔄 Processing</option>
+          </select>
+        </div>
+        <button type="submit" class="btn btn-primary">Filter</button>
+        <a href="/admin/generated-images" class="btn btn-ghost">Clear</a>
+      </form>
+    </div>
+
+    <!-- Image Grid -->
+    <% if (images.length === 0) { %>
+      <div class="card" style="text-align:center; padding:48px; color:#64748b;">
+        <div style="font-size:48px; margin-bottom:16px;">🖼️</div>
+        <p>No generated images found.</p>
+      </div>
+    <% } else { %>
+      <div style="display:grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap:16px; margin-bottom:24px;">
+        <% images.forEach(img => { %>
+          <div style="background:#1a1a2e; border:1px solid #2d2d44; border-radius:10px; overflow:hidden; display:flex; flex-direction:column;">
+
+            <!-- Image thumbnail -->
+            <div style="position:relative; height:200px; background:#111122; flex-shrink:0;">
+              <% if (img.imageUrl) { %>
+                <img src="<%= img.imageUrl %>"
+                     alt="Generated image"
+                     loading="lazy"
+                     style="width:100%; height:100%; object-fit:cover; cursor:pointer;"
+                     onclick="openLightbox('<%= img.imageUrl %>')"
+                     onerror="this.parentElement.innerHTML='<div style=\'display:flex;align-items:center;justify-content:center;height:100%;color:#64748b;font-size:13px;\'>Image expired</div>'">
+              <% } else { %>
+                <div style="display:flex; align-items:center; justify-content:center; height:100%; color:#64748b; font-size:13px;">
+                  <% if (img.status === 'failed') { %>❌ Failed<% } else { %>⏳ Pending<% } %>
+                </div>
+              <% } %>
+
+              <!-- Status badge -->
+              <span style="position:absolute; top:8px; right:8px; padding:3px 8px; border-radius:4px; font-size:10px; font-weight:600;
+                background:<%= img.status === 'succeeded' ? 'rgba(5,150,105,0.85)' : img.status === 'failed' ? 'rgba(220,38,38,0.85)' : 'rgba(100,116,139,0.85)' %>;
+                color:#fff;">
+                <%= img.status %>
+              </span>
+            </div>
+
+            <!-- Info -->
+            <div style="padding:12px; flex:1; display:flex; flex-direction:column; gap:6px;">
+
+              <!-- User info -->
+              <div style="display:flex; align-items:center; gap:8px;">
+                <span style="font-size:18px;">👤</span>
+                <div>
+                  <div style="font-size:13px; font-weight:600; color:#f1f5f9;">
+                    <%= img.user?.firstName || 'Unknown' %>
+                    <% if (img.user?.username) { %><span style="color:#94a3b8;">@<%= img.user.username %></span><% } %>
+                  </div>
+                  <div style="font-size:11px; color:#64748b;">ID: <%= img.telegramId %></div>
+                </div>
+              </div>
+
+              <!-- Prompt -->
+              <div style="font-size:12px; color:#a1a1aa; background:#111122; border-radius:4px; padding:8px; line-height:1.4; max-height:60px; overflow:hidden; text-overflow:ellipsis;">
+                <b style="color:#94a3b8;">Prompt:</b> <%= img.userPrompt %>
+              </div>
+
+              <!-- Meta row -->
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-top:auto;">
+                <span style="font-size:10px; color:#64748b;">
+                  <%= new Date(img.createdAt).toLocaleString() %>
+                </span>
+                <span style="font-size:10px; padding:2px 6px; border-radius:3px;
+                  background:<%= img.userPlan === 'premium' ? 'rgba(167,139,250,0.2)' : 'rgba(100,116,139,0.15)' %>;
+                  color:<%= img.userPlan === 'premium' ? '#a78bfa' : '#94a3b8' %>;">
+                  <%= img.userPlan %>
+                </span>
+              </div>
+
+              <!-- Model -->
+              <div style="font-size:10px; color:#475569; overflow:hidden; white-space:nowrap; text-overflow:ellipsis;" title="<%= img.model %>">
+                🤖 <%= img.model %>
+              </div>
+
+              <% if (img.imageUrl) { %>
+                <a href="<%= img.imageUrl %>" target="_blank" class="btn btn-ghost btn-sm" style="margin-top:6px; text-align:center; font-size:12px;">
+                  Open Full Image ↗
+                </a>
+              <% } %>
+            </div>
+          </div>
+        <% }) %>
+      </div>
+    <% } %>
+
+    <!-- Pagination -->
+    <% if (totalPages > 1) { %>
+      <div style="display:flex; gap:8px; justify-content:center; margin-top:20px;">
+        <% for (let i = 1; i <= totalPages; i++) { %>
+          <a href="/admin/generated-images?page=<%= i %>&search=<%= search %>&status=<%= statusFilter %>"
+             class="btn <%= i === currentPage ? 'btn-primary' : 'btn-ghost' %> btn-sm">
+            <%= i %>
+          </a>
+        <% } %>
+      </div>
+    <% } %>
+
+  </main>
+</div>
+
+<!-- Lightbox -->
+<div id="lightbox" onclick="closeLightbox()"
+     style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.9); z-index:9999; align-items:center; justify-content:center; cursor:zoom-out;">
+  <img id="lightbox-img" src="" alt="Full image"
+       style="max-width:90vw; max-height:90vh; border-radius:8px; object-fit:contain; box-shadow:0 0 60px rgba(0,0,0,0.8);">
+</div>
+
+<script>
+function openLightbox(url) {
+  const lb = document.getElementById('lightbox');
+  document.getElementById('lightbox-img').src = url;
+  lb.style.display = 'flex';
+}
+function closeLightbox() {
+  document.getElementById('lightbox').style.display = 'none';
+}
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeLightbox(); });
+</script>
+
+</body></html>
