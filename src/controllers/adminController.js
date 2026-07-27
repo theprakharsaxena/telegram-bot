@@ -495,6 +495,7 @@ async function getGeneratedImages(req, res) {
 
     res.render('admin/generated_images', {
       page:         'generated_images',
+      botName:      config.bot.name,
       images:       imagesWithUsers,
       total,
       currentPage:  page,
