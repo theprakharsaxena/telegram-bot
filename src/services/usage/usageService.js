@@ -86,11 +86,20 @@ async function getOrCreateToday(userId, telegramId, plan) {
     try {
       const userObj = await User.findById(userId);
       if (userObj) {
+        // Apply custom limits if set
         if (typeof userObj.customFreeMessages === 'number' && userObj.customFreeMessages !== null) {
           planLimits.dailyMessages = userObj.customFreeMessages;
         }
         if (typeof userObj.customFreeImages === 'number' && userObj.customFreeImages !== null) {
           planLimits.dailyImages = userObj.customFreeImages;
+        }
+
+        // Add ad bonus rewards on top of the base limit
+        if (userObj.adBonusMessages > 0) {
+          planLimits.dailyMessages += userObj.adBonusMessages;
+        }
+        if (userObj.adBonusImages > 0) {
+          planLimits.dailyImages += userObj.adBonusImages;
         }
       }
     } catch (err) {

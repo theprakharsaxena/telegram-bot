@@ -146,6 +146,11 @@ const userSchema = new mongoose.Schema(
     // ── Custom plan credit overrides per user ─────────────────────────────
     customFreeMessages: { type: Number, default: null },
     customFreeImages: { type: Number, default: null },
+
+    // ── Adsgram rewarded ads tracking ─────────────────────────────────────
+    adBonusMessages: { type: Number, default: 0, min: 0 },
+    adBonusImages: { type: Number, default: 0, min: 0 },
+    lastAdWatchedAt: { type: Date, default: null },
   },
   {
     timestamps: true, // adds createdAt, updatedAt automatically

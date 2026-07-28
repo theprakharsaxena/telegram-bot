@@ -23,6 +23,7 @@ const express = require('express');
 const { getBot } = require('../services/bot/telegramService');
 const config = require('../config/env');
 const logger = require('../utils/logger');
+const { User } = require('../models');
 
 const router = express.Router();
 
@@ -85,6 +86,57 @@ router.get('/info', async (req, res) => {
     res.json({ ok: true, webhookInfo: info });
   } catch (err) {
     res.status(500).json({ ok: false, error: err.message });
+  }
+});
+
+// ---------------------------------------------------------------------------
+// GET /webhook/adsgram-reward — Adsgram rewarded ad callback
+// Called by Adsgram when a user successfully watches a rewarded ad.
+// The userId parameter contains the Telegram user ID.
+// ---------------------------------------------------------------------------
+router.get('/adsgram-reward', async (req, res) => {
+  const { userid } = req.query;
+
+  if (!userid || !config.adsgram.enabled) {
+    logger.warn('Adsgram reward: invalid request or ads disabled', { userid });
+    return res.status(400).json({ ok: false, error: 'Invalid request' });
+  }
+
+  const telegramId = parseInt(userid, 10);
+  if (isNaN(telegramId)) {
+    logger.warn('Adsgram reward: invalid userId format', { userid });
+    return res.status(400).json({ ok: false, error: 'Invalid userId' });
+  }
+
+  try {
+    const user = await User.findByTelegramId(telegramId);
+    if (!user) {
+      logger.warn('Adsgram reward: user not found', { telegramId });
+      return res.status(404).json({ ok: false, error: 'User not found' });
+    }
+
+    // Only grant rewards to free users
+    if (user.isPremium) {
+      logger.info('Adsgram reward: premium user tried to watch ad', { telegramId });
+      return res.json({ ok: true, message: 'Premium user - no reward needed' });
+    }
+
+    // Grant bonus messages and images
+    user.adBonusMessages += config.adsgram.bonusMessages;
+    user.adBonusImages += config.adsgram.bonusImages;
+    user.lastAdWatchedAt = new Date();
+    await user.save();
+
+    logger.info('Adsgram reward granted', {
+      telegramId,
+      bonusMessages: config.adsgram.bonusMessages,
+      bonusImages: config.adsgram.bonusImages,
+    });
+
+    res.json({ ok: true, message: 'Reward granted' });
+  } catch (err) {
+    logger.error('Adsgram reward error', { telegramId, error: err.message });
+    res.status(500).json({ ok: false, error: 'Internal error' });
   }
 });
 

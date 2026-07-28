@@ -83,6 +83,39 @@ async function premiumCommand(msg) {
     ? Math.round((1 - monthlyPriceRate / dailyPriceRate) * 100)
     : 0;
 
+  // Build inline keyboard
+  const inlineKeyboard = [
+    [
+      {
+        text: `⚡ 1 Day VIP Access — ${dailyPrice} ⭐`,
+        callback_data: 'payment:daily',
+      },
+    ],
+    [
+      {
+        text: `📅 7 Days VIP Access — ${weeklyPrice} ⭐ ${weeklySavings > 0 ? `(save ${weeklySavings}%)` : ''}`,
+        callback_data: 'payment:weekly',
+      },
+    ],
+    [
+      {
+        text: `🗓️ 30 Days VIP Access — ${monthlyPrice} ⭐ ${monthlySavings > 0 ? `(save ${monthlySavings}%)` : ''}`,
+        callback_data: 'payment:monthly',
+      },
+    ],
+    [{ text: '❓ What are Telegram Stars?', callback_data: 'payment:stars_info' }],
+  ];
+
+  // Add "Watch Ad" button if Adsgram is enabled
+  if (config.adsgram.enabled) {
+    inlineKeyboard.splice(3, 0, [
+      {
+        text: `🎬 Watch Ad — +${config.adsgram.bonusMessages} msgs & +${config.adsgram.bonusImages} images`,
+        callback_data: 'adsgram:watch',
+      },
+    ]);
+  }
+
   await sendMessage(
     chatId,
     `🔥 <b>Get VIP Premium Pass</b> 🔥\n\n` +
@@ -92,30 +125,13 @@ async function premiumCommand(msg) {
     `🧠 <b>Deep memory tracking</b> — she remembers your desires!\n` +
     `✨ <b>Unlock all hot & exclusive girlfriends</b> 👙\n` +
     `⚡ <b>Priority instant responses</b> — zero delays!\n\n` +
-    `<b>Choose your VIP plan:</b>`,
+    `<b>Choose your VIP plan:</b>` +
+    (config.adsgram.enabled
+      ? `\n\n💡 <b>Or watch a short ad to get bonus credits!</b>`
+      : ''),
     {
       reply_markup: {
-        inline_keyboard: [
-          [
-            {
-              text: `⚡ 1 Day VIP Access — ${dailyPrice} ⭐`,
-              callback_data: 'payment:daily',
-            },
-          ],
-          [
-            {
-              text: `📅 7 Days VIP Access — ${weeklyPrice} ⭐ ${weeklySavings > 0 ? `(save ${weeklySavings}%)` : ''}`,
-              callback_data: 'payment:weekly',
-            },
-          ],
-          [
-            {
-              text: `🗓️ 30 Days VIP Access — ${monthlyPrice} ⭐ ${monthlySavings > 0 ? `(save ${monthlySavings}%)` : ''}`,
-              callback_data: 'payment:monthly',
-            },
-          ],
-          [{ text: '❓ What are Telegram Stars?', callback_data: 'payment:stars_info' }],
-        ],
+        inline_keyboard: inlineKeyboard,
       },
     }
   );

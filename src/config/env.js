@@ -80,6 +80,13 @@ const envSchema = Joi.object({
   LOG_LEVEL: Joi.string()
     .valid('error', 'warn', 'info', 'http', 'verbose', 'debug', 'silly')
     .default('info'),
+
+  // ── Adsgram Rewarded Ads ───────────────────────────────────────────────────
+  ADSGRAM_ENABLED: Joi.boolean().default(false),
+  ADSGRAM_BOT_ID: Joi.string().allow('').default(''),
+  ADSGRAM_AD_UNIT_ID: Joi.string().allow('').default(''),
+  ADSGRAM_BONUS_MESSAGES: Joi.number().integer().default(20),
+  ADSGRAM_BONUS_IMAGES: Joi.number().integer().default(3),
 })
   // Allow unknown keys so third-party tools can add env vars without breaking
   // our validation. We only assert what we care about.
@@ -183,6 +190,14 @@ const config = {
 
   logging: {
     level: envVars.LOG_LEVEL,
+  },
+
+  adsgram: {
+    enabled: envVars.ADSGRAM_ENABLED,
+    botId: envVars.ADSGRAM_BOT_ID,
+    adUnitId: envVars.ADSGRAM_AD_UNIT_ID,
+    bonusMessages: envVars.ADSGRAM_BONUS_MESSAGES,
+    bonusImages: envVars.ADSGRAM_BONUS_IMAGES,
   },
 };
 

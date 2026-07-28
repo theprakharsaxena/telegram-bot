@@ -21,6 +21,7 @@ const { handleSettingsCallback,
 const { handlePersonalityCallback } = require('./personalityCallbackHandler');
 const { handlePaymentCallback }    = require('./paymentCallbackHandler');
 const { handleMemoryCallback }     = require('./memoryCallbackHandler');
+const config                       = require('../../config/env');
 const logger                        = require('../../utils/logger');
 
 async function handleCallback(query, ctx) {
@@ -59,6 +60,10 @@ async function handleCallback(query, ctx) {
 
       case 'memory':
         await handleMemoryCallback(rest, query, ctx);
+        break;
+
+      case 'adsgram':
+        await handleAdsgramCallback(rest, query, ctx);
         break;
 
       default:
@@ -147,6 +152,54 @@ async function handleAction(action, chatId, query, ctx) {
 
     default:
       logger.warn('Unknown action in callback', { action, chatId });
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Adsgram rewarded ad handler
+// ---------------------------------------------------------------------------
+async function handleAdsgramCallback(action, query, ctx) {
+  const { user, chatId } = ctx;
+
+  if (!config.adsgram.enabled) {
+    await sendMessage(chatId, '😔 Ads are currently disabled.');
+    return;
+  }
+
+  if (user.isPremium) {
+    await sendMessage(chatId, '⭐ You already have premium! No need to watch ads.');
+    return;
+  }
+
+  if (action === 'watch') {
+    // Send the Adsgram rewarded ad
+    // Format: https://t.me/{botId}?start={adUnitId}_{userId}
+    const adUrl = `https://t.me/${config.adsgram.botId}?start=${config.adsgram.adUnitId}_${user.telegramId}`;
+
+    await sendMessage(
+      chatId,
+      `🎬 <b>Watch Ad to Get Bonus Credits!</b>\n\n` +
+      `Watch this short ad to receive:\n` +
+      `• +${config.adsgram.bonusMessages} message credits\n` +
+      `• +${config.adsgram.bonusImages} image credits\n\n` +
+      `<b>Important:</b>\n` +
+      `• You must watch the entire ad to receive rewards\n` +
+      `• Rewards are granted automatically after successful completion\n` +
+      `• If the ad fails to load, no rewards will be granted`,
+      {
+        reply_markup: {
+          inline_keyboard: [
+            [
+              {
+                text: '🎬 Watch Ad Now',
+                url: adUrl,
+              },
+            ],
+            [{ text: '❌ Cancel', callback_data: 'back' }],
+          ],
+        },
+      }
+    );
   }
 }
 

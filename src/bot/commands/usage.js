@@ -27,6 +27,12 @@ async function usageCommand(msg) {
   const imgLimit = usage?.imageLimit    ?? planLimits.dailyImages;
   const resetAt  = usageService.getResetTime();
 
+  // Calculate ad bonus
+  const adBonusMsgs = user.adBonusMessages ?? 0;
+  const adBonusImgs = user.adBonusImages ?? 0;
+  const baseMsgLimit = msgLimit - adBonusMsgs;
+  const baseImgLimit = imgLimit - adBonusImgs;
+
   // ── Visual progress bar ───────────────────────────────────────────────────
   function bar(used, limit, width = 12) {
     const pct    = limit > 0 ? Math.min(used / limit, 1) : 0;
@@ -57,15 +63,28 @@ async function usageCommand(msg) {
 
   const planBadge = isPremium ? '⭐ Premium' : '🆓 Free';
 
-  const text =
+  // Build usage text with ad bonus breakdown
+  let usageText =
     `📊 <b>Today's Usage</b>  ·  ${planBadge}\n\n` +
 
     `💬 <b>Messages</b>  ${msgUsed}/${msgLimitLabel}${msgWarningText}\n` +
-    `${isPremium ? '🟩'.repeat(12) : bar(msgUsed, msgLimit)}\n\n` +
+    `${isPremium ? '🟩'.repeat(12) : bar(msgUsed, msgLimit)}\n`;
 
+  if (!isPremium && (adBonusMsgs > 0 || adBonusImgs > 0)) {
+    usageText += `🎬 <i>+${adBonusMsgs} bonus from ads</i>\n`;
+  }
+  usageText += '\n';
+
+  usageText +=
     `🖼️ <b>Images</b>  ${imgUsed}/${imgLimit}${imgWarning}\n` +
-    `${bar(imgUsed, imgLimit)}\n\n` +
+    `${bar(imgUsed, imgLimit)}\n`;
 
+  if (!isPremium && (adBonusMsgs > 0 || adBonusImgs > 0)) {
+    usageText += `🎬 <i>+${adBonusImgs} bonus from ads</i>\n`;
+  }
+  usageText += '\n';
+
+  usageText +=
     `⏰ Resets in <b>${resetAt}</b> (midnight UTC)\n` +
 
     (!isPremium
@@ -84,7 +103,7 @@ async function usageCommand(msg) {
     ],
   };
 
-  await sendMessage(chatId, text, { reply_markup: keyboard });
+  await sendMessage(chatId, usageText, { reply_markup: keyboard });
 }
 
 module.exports = { usageCommand };

@@ -1,0 +1,15 @@
+{
+    "keep": {
+        "days": true,
+        "amount": 14
+    },
+    "auditLog": "/Users/prakharsaxena/Downloads/telegram-bot/logs/.3b8140b62efae08a59ed67b3dba3764ac5055c7b-audit.json",
+    "files": [
+        {
+            "date": 1785210521878,
+            "name": "/Users/prakharsaxena/Downloads/telegram-bot/logs/combined-2026-07-28.log",
+            "hash": "63b9b263cf9b80dd6928a1f2cfce744cc6a99725986d9400c122c9676dc1ff5e"
+        }
+    ],
+    "hashType": "sha256"
+}
