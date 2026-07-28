@@ -26,10 +26,10 @@ module.exports = {
       script: 'server.js',
 
       // ── Concurrency ───────────────────────────────────────────────────────
-      // 'max' uses all CPU cores. Cap at 4 to keep memory predictable on a
-      // t3.medium (2 vCPU). Raise for larger instance types.
-      instances: 'max',
-      exec_mode: 'cluster',
+      // Telegram bot MUST run in fork mode (single instance).
+      // Cluster mode causes multiple bot instances to conflict with each other.
+      instances: 1,
+      exec_mode: 'fork',
 
       // ── Restart policy ────────────────────────────────────────────────────
       autorestart: true,
@@ -39,7 +39,9 @@ module.exports = {
       restart_delay: 4000,       // Wait 4 s between restarts (backoff)
 
       // ── Resource limits ───────────────────────────────────────────────────
-      max_memory_restart: '512M',
+      // Increased to 1GB to prevent frequent restarts due to memory pressure
+      // (MongoDB + Redis + BullMQ + Express + Bot require more memory)
+      max_memory_restart: '1G',
 
       // ── Logging ───────────────────────────────────────────────────────────
       // Winston writes structured logs to ./logs/ — PM2 output just captures

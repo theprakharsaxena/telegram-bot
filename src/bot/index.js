@@ -146,14 +146,33 @@ async function registerWebhook() {
   const webhookUrl = `${config.telegram.webhookUrl}/webhook/${config.telegram.token}`;
 
   try {
+    // First, delete any existing webhook to ensure clean state
+    await bot.deleteWebHook().catch(() => {
+      logger.warn('Failed to delete existing webhook (may not exist)');
+    });
+
+    // Wait a moment for Telegram to process the deletion
+    await new Promise(resolve => setTimeout(resolve, 1000));
+
+    // Register the new webhook
     await bot.setWebHook(webhookUrl, {
       secret_token:     config.telegram.webhookSecret,
       max_connections:  40,
       allowed_updates:  ['message', 'callback_query', 'pre_checkout_query'],
     });
-    logger.info(`Webhook registered: ${webhookUrl}`);
+
+    // Verify the webhook was registered correctly
+    const webhookInfo = await bot.getWebHookInfo();
+    if (webhookInfo.url !== webhookUrl) {
+      throw new Error(`Webhook verification failed. Expected: ${webhookUrl}, Got: ${webhookInfo.url}`);
+    }
+
+    logger.info(`Webhook registered and verified: ${webhookUrl}`, {
+      max_connections: webhookInfo.max_connections,
+      allowed_updates: webhookInfo.allowed_updates,
+    });
   } catch (err) {
-    logger.error('Failed to register webhook', { error: err.message });
+    logger.error('Failed to register webhook', { error: err.message, stack: err.stack });
     throw err;
   }
 }

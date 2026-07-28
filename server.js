@@ -46,6 +46,7 @@ const app                                     = require('./src/app');
 const { initBotHandlers }                     = require('./src/bot');
 const { startImageWorker, closeImageQueue }   = require('./src/jobs/imageQueue');
 const { startSubscriptionJob }                = require('./src/jobs/subscriptionJob');
+const { startWebhookHealthCheck, stopWebhookHealthCheck } = require('./src/services/bot/webhookHealthCheck');
 
 // Register all Mongoose models before any query runs
 require('./src/models');
@@ -73,6 +74,9 @@ async function start() {
     // Start subscription expiry + renewal reminder job (runs hourly)
     startSubscriptionJob();
 
+    // Start webhook health check (production only - runs every 5 minutes)
+    startWebhookHealthCheck();
+
     // Start HTTP server
     const server = app.listen(config.port, () => {
       logger.info(`HTTP server listening on port ${config.port}`);
@@ -90,6 +94,7 @@ async function start() {
         logger.info('HTTP server closed (no new connections)');
 
         try {
+          stopWebhookHealthCheck();
           await disconnectDatabase();
           await disconnectRedis();
           await closeImageQueue();

@@ -44,6 +44,10 @@ function initBot() {
       },
     });
     logger.info('Telegram bot started in POLLING mode (development)');
+  } else if (config.isTest) {
+    // Test mode - no polling or webhook
+    botInstance = new TelegramBot(config.telegram.token, { polling: false });
+    logger.info('Telegram bot started in TEST mode (no polling/webhook)');
   } else {
     // Webhook mode — production
     // We do NOT pass webHook config here; Express handles the HTTP layer.
@@ -56,10 +60,12 @@ function initBot() {
   // Global bot error handler — prevents unhandled rejection crashes
   botInstance.on('polling_error', (err) => {
     logger.error(`Telegram polling error: ${err.message}`, { code: err.code });
+    // Don't crash on polling errors - let the library retry automatically
   });
 
   botInstance.on('webhook_error', (err) => {
-    logger.error(`Telegram webhook error: ${err.message}`);
+    logger.error(`Telegram webhook error: ${err.message}`, { stack: err.stack });
+    // Don't crash on webhook errors - the health check will recover
   });
 
   return botInstance;
