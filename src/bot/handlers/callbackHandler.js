@@ -185,7 +185,9 @@ async function handleAdsgramCallback(action, query, ctx) {
       `<b>Important:</b>\n` +
       `• You must watch the entire ad to receive rewards\n` +
       `• Rewards are granted automatically after successful completion\n` +
-      `• If the ad fails to load, no rewards will be granted`,
+      `• If the ad fails to load, no rewards will be granted\n\n` +
+      `💡 <b>If you get an error:</b>\n` +
+      `First start the Adsgram bot with /start, then try again.`,
       {
         reply_markup: {
           inline_keyboard: [
@@ -193,6 +195,12 @@ async function handleAdsgramCallback(action, query, ctx) {
               {
                 text: '🎬 Watch Ad Now',
                 url: adUrl,
+              },
+            ],
+            [
+              {
+                text: '🤖 Start Adsgram Bot First',
+                url: `https://t.me/${config.adsgram.botId}?start`,
               },
             ],
             [{ text: '❌ Cancel', callback_data: 'back' }],
