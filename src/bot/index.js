@@ -81,12 +81,18 @@ async function initBotHandlers() {
     const { id: callbackId, data, message, from } = query;
     const chatId = message?.chat?.id;
 
+    logger.info('Callback query received', { data, chatId, telegramId: from?.id });
+
     await bot.answerCallbackQuery(callbackId).catch(() => {});
-    if (!data || !chatId || !from) return;
+    if (!data || !chatId || !from) {
+      logger.warn('Callback query missing required fields', { hasData: !!data, hasChatId: !!chatId, hasFrom: !!from });
+      return;
+    }
 
     const syntheticMsg = { chat: { id: chatId, type: 'private' }, from, text: '' };
 
     withBotAuth(async (msg) => {
+      logger.info('Callback after auth', { hasCtx: !!msg._ctx, hasUser: !!msg._ctx?.user });
       await handleCallback(query, msg._ctx);
     })(syntheticMsg);
   });

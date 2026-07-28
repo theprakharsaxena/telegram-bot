@@ -28,6 +28,8 @@ async function handleCallback(query, ctx) {
   const { data, message } = query;
   const chatId = message?.chat?.id;
 
+  logger.info('Callback received', { data, chatId, hasCtx: !!ctx, hasUser: !!ctx?.user });
+
   if (!data || !chatId) return;
 
   // Split only on first two colons so payloads can contain ':'
@@ -161,8 +163,22 @@ async function handleAction(action, chatId, query, ctx) {
 async function handleAdsgramCallback(action, query, ctx) {
   const { user, chatId } = ctx;
 
+  logger.info('Adsgram callback', { action, hasUser: !!user, telegramId: user?.telegramId, chatId });
+
+  if (!user) {
+    logger.error('Adsgram callback: user not found in context', { ctx });
+    await sendMessage(chatId, '😔 User data not found. Please try /start again.');
+    return;
+  }
+
   if (!config.adsgram.enabled) {
     await sendMessage(chatId, '😔 Ads are currently disabled.');
+    return;
+  }
+
+  if (!config.adsgram.botId || !config.adsgram.adUnitId) {
+    logger.error('Adsgram config missing', { botId: config.adsgram.botId, adUnitId: config.adsgram.adUnitId });
+    await sendMessage(chatId, '😔 Ad system not configured properly. Please contact support.');
     return;
   }
 
@@ -173,8 +189,11 @@ async function handleAdsgramCallback(action, query, ctx) {
 
   if (action === 'watch') {
     // Send the Adsgram rewarded ad
+    // The user must first start the Adsgram bot, then we can send them to the ad
     // Format: https://t.me/{botId}?start={adUnitId}_{userId}
     const adUrl = `https://t.me/${config.adsgram.botId}?start=${config.adsgram.adUnitId}_${user.telegramId}`;
+
+    logger.info('Sending Adsgram ad URL', { adUrl, telegramId: user.telegramId });
 
     await sendMessage(
       chatId,
@@ -182,25 +201,25 @@ async function handleAdsgramCallback(action, query, ctx) {
       `Watch this short ad to receive:\n` +
       `• +${config.adsgram.bonusMessages} message credits\n` +
       `• +${config.adsgram.bonusImages} image credits\n\n` +
-      `<b>Important:</b>\n` +
-      `• You must watch the entire ad to receive rewards\n` +
-      `• Rewards are granted automatically after successful completion\n` +
-      `• If the ad fails to load, no rewards will be granted\n\n` +
-      `💡 <b>If you get an error:</b>\n` +
-      `First start the Adsgram bot with /start, then try again.`,
+      `<b>⚠️ IMPORTANT - Follow these steps:</b>\n` +
+      `1. First click "🤖 Start Adsgram Bot" below\n` +
+      `2. Send /start to the Adsgram bot\n` +
+      `3. Then come back here and click "🎬 Watch Ad Now"\n\n` +
+      `If you skip step 1-2, you'll get an error saying "user doesn't exist".\n\n` +
+      `Rewards are granted automatically after watching the full ad.`,
       {
         reply_markup: {
           inline_keyboard: [
             [
               {
-                text: '🎬 Watch Ad Now',
-                url: adUrl,
+                text: '🤖 Step 1: Start Adsgram Bot',
+                url: `https://t.me/${config.adsgram.botId}?start`,
               },
             ],
             [
               {
-                text: '🤖 Start Adsgram Bot First',
-                url: `https://t.me/${config.adsgram.botId}?start`,
+                text: '🎬 Step 2: Watch Ad Now',
+                url: adUrl,
               },
             ],
             [{ text: '❌ Cancel', callback_data: 'back' }],
