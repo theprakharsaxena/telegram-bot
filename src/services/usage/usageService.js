@@ -269,9 +269,10 @@ function buildLimitExceededMessage(type, used, limit, resetAt, isPremium) {
   return (
     `⏰ <b>Daily ${type} limit reached!</b>\n\n` +
     `You've used <b>${used}/${limit}</b> free ${typeLabel} today.\n` +
-    `Resets in <b>${resetAt}</b> (midnight UTC)\n\n` +
-    `⭐ <b>Want unlimited ${typeLabel}?</b>\n` +
-    `Upgrade to Premium with /premium and never hit a limit again!`
+    `Resets in <b>${resetAt}</b> (midnight UTC).\n\n` +
+    `⚡ <b>Need more right now?</b>\n` +
+    `Top up <b>+20 Messages & +3 Uncensored 🔞 Images</b> for just <b>1 ⭐</b>!\n` +
+    `Or upgrade to VIP Premium with /premium.`
   );
 }
 

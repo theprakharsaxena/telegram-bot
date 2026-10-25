@@ -80,7 +80,7 @@ async function usageCommand(msg) {
     `${bar(imgUsed, imgLimit)}\n`;
 
   if (!isPremium && (adBonusMsgs > 0 || adBonusImgs > 0)) {
-    usageText += `🎬 <i>+${adBonusImgs} bonus from ads</i>\n`;
+    usageText += `⚡ <i>+${adBonusMsgs} bonus msgs & +${adBonusImgs} bonus images active</i>\n`;
   }
   usageText += '\n';
 
@@ -90,7 +90,8 @@ async function usageCommand(msg) {
     (!isPremium
       ? `\n` +
         `⭐ <b>Go Premium</b> for Unlimited chat ` +
-        `and ${config.limits.premium.dailyImages} uncensored 🔞 images/day → /premium`
+        `and ${config.limits.premium.dailyImages} uncensored 🔞 images/day → /premium\n` +
+        `⚡ Or get a <b>+20 msgs & +3 images</b> top-up for <b>1 ⭐</b>!`
       : `\n✨ Enjoying your premium benefits!`);
 
   const keyboard = {
@@ -101,17 +102,8 @@ async function usageCommand(msg) {
       ],
       ...(!isPremium
         ? [
+            [{ text: '⚡ +20 Msgs & +3 Images (1 ⭐)', callback_data: 'payment:boost' }],
             [{ text: '⭐ Upgrade to Premium', callback_data: 'action:premium' }],
-            ...(config.adsgram.enabled
-              ? [
-                  [
-                    {
-                      text: `🎬 Watch Ad (+${config.adsgram.bonusMessages} 💬 / +${config.adsgram.bonusImages} 🖼️)`,
-                      web_app: { url: `${config.telegram.webhookUrl}/ads/watch?userId=${user.telegramId}` },
-                    },
-                  ],
-                ]
-              : []),
           ]
         : []),
     ],

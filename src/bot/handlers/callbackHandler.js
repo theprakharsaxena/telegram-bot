@@ -64,10 +64,6 @@ async function handleCallback(query, ctx) {
         await handleMemoryCallback(rest, query, ctx);
         break;
 
-      case 'adsgram':
-        await handleAdsgramCallback(rest, query, ctx);
-        break;
-
       default:
         logger.warn('Unknown callback namespace', { data, chatId });
     }
@@ -157,63 +153,6 @@ async function handleAction(action, chatId, query, ctx) {
   }
 }
 
-// ---------------------------------------------------------------------------
-// Adsgram rewarded ad handler
-// ---------------------------------------------------------------------------
-async function handleAdsgramCallback(action, query, ctx) {
-  const { user, chatId } = ctx;
 
-  logger.info('Adsgram callback', { action, hasUser: !!user, telegramId: user?.telegramId, chatId });
-
-  if (!user) {
-    logger.error('Adsgram callback: user not found in context', { ctx });
-    await sendMessage(chatId, '😔 User data not found. Please try /start again.');
-    return;
-  }
-
-  if (!config.adsgram.enabled) {
-    await sendMessage(chatId, '😔 Ads are currently disabled.');
-    return;
-  }
-
-  if (!config.adsgram.botId || !config.adsgram.adUnitId) {
-    logger.error('Adsgram config missing', { botId: config.adsgram.botId, adUnitId: config.adsgram.adUnitId });
-    await sendMessage(chatId, '😔 Ad system not configured properly. Please contact support.');
-    return;
-  }
-
-  if (user.isPremium) {
-    await sendMessage(chatId, '⭐ You already have premium! No need to watch ads.');
-    return;
-  }
-
-  if (action === 'watch') {
-    const webAppUrl = `${config.telegram.webhookUrl}/ads/watch?userId=${user.telegramId}`;
-
-    logger.info('Sending Adsgram WebApp ad button', { webAppUrl, telegramId: user.telegramId });
-
-    await sendMessage(
-      chatId,
-      `🎬 <b>Watch a Short Ad to Get Bonus Credits!</b>\n\n` +
-      `🎁 <b>Your Rewards:</b>\n` +
-      `• <b>+${config.adsgram.bonusMessages}</b> Message Credits 💬\n` +
-      `• <b>+${config.adsgram.bonusImages}</b> Image Credits 🖼️\n\n` +
-      `Tap <b>"🎬 Watch Ad Now"</b> below to play the video. Your credits will be added to your account as soon as the video finishes!`,
-      {
-        reply_markup: {
-          inline_keyboard: [
-            [
-              {
-                text: '🎬 Watch Ad Now (+20 💬 / +3 🖼️)',
-                web_app: { url: webAppUrl },
-              },
-            ],
-            [{ text: '❌ Cancel', callback_data: 'back' }],
-          ],
-        },
-      }
-    );
-  }
-}
 
 module.exports = { handleCallback };

@@ -198,7 +198,15 @@ async function handleChatMessage(msg) {
           limitCheck.limit,
           limitCheck.resetAt,
           isPremium
-        )
+        ),
+        {
+          reply_markup: {
+            inline_keyboard: [
+              [{ text: '⚡ +20 Messages & +3 Images (1 ⭐)', callback_data: 'payment:boost' }],
+              [{ text: '⭐ Upgrade to Premium', callback_data: 'action:premium' }],
+            ],
+          },
+        }
       );
       return;
     }
@@ -343,7 +351,15 @@ async function handleChatMessage(msg) {
               imgLimitCheck.limit,
               imgLimitCheck.resetAt,
               isPremium
-            )
+            ),
+            {
+              reply_markup: {
+                inline_keyboard: [
+                  [{ text: '⚡ +20 Messages & +3 Images (1 ⭐)', callback_data: 'payment:boost' }],
+                  [{ text: '⭐ Upgrade to Premium', callback_data: 'action:premium' }],
+                ],
+              },
+            }
           ).catch(() => {});
         });
       } else {

@@ -54,7 +54,7 @@ const paymentSchema = new mongoose.Schema(
     },
     planType: {
       type: String,
-      enum: ['daily', 'weekly', 'monthly'],
+      enum: ['daily', 'weekly', 'monthly', 'boost'],
       required: true,
     },
     // Amount in Telegram Stars

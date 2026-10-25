@@ -45,17 +45,34 @@ const PLAN_DURATIONS = {
  * @param {object} settings   — AdminSettings (for runtime pricing)
  */
 async function createInvoice(user, planType, settings) {
-  if (!['daily', 'weekly', 'monthly'].includes(planType)) {
+  if (!['daily', 'weekly', 'monthly', 'boost'].includes(planType)) {
     throw new AppError('Invalid plan type', 400);
   }
 
   let starsPrice;
-  if (planType === 'daily') {
-    starsPrice = settings?.starsDailyPrice ?? config.stars.dailyPrice;
-  } else if (planType === 'weekly') {
-    starsPrice = settings?.starsWeeklyPrice ?? config.stars.weeklyPrice;
+  let title;
+  let description;
+  let priceLabel;
+
+  if (planType === 'boost') {
+    starsPrice = 1;
+    title = `${config.bot.name} — 20 Messages & 3 Images Boost`;
+    description = `Instant top-up: +20 message credits and +3 uncensored 🔞 image credits added to your balance immediately!`;
+    priceLabel = '20 Msgs & 3 Images (1 ⭐)';
   } else {
-    starsPrice = settings?.starsMonthlyPrice ?? config.stars.monthlyPrice;
+    if (planType === 'daily') {
+      starsPrice = settings?.starsDailyPrice ?? config.stars.dailyPrice;
+    } else if (planType === 'weekly') {
+      starsPrice = settings?.starsWeeklyPrice ?? config.stars.weeklyPrice;
+    } else {
+      starsPrice = settings?.starsMonthlyPrice ?? config.stars.monthlyPrice;
+    }
+
+    const planLabel  = planType === 'daily' ? 'Daily' : (planType === 'weekly' ? 'Weekly' : 'Monthly');
+    const days       = PLAN_DURATIONS[planType];
+    title       = `${config.bot.name} Premium — ${planLabel}`;
+    description = `${days} days of unlimited conversations, ${config.limits.premium.dailyImages} uncensored 🔞 images/day, long-term memory, and exclusive personalities.`;
+    priceLabel  = `${planLabel} Premium`;
   }
 
   // Unique payload — used to match this payment in pre_checkout + successful_payment
@@ -72,17 +89,12 @@ async function createInvoice(user, planType, settings) {
     status:         'pending',
   });
 
-  const planLabel  = planType === 'daily' ? 'Daily' : (planType === 'weekly' ? 'Weekly' : 'Monthly');
-  const days       = PLAN_DURATIONS[planType];
-
   try {
     await sendInvoice(user.telegramId, {
-      title:       `${config.bot.name} Premium — ${planLabel}`,
-      description:
-        `${days} days of unlimited conversations, ${config.limits.premium.dailyImages} uncensored 🔞 images/day, ` +
-        `long-term memory, and exclusive personalities.`,
+      title,
+      description,
       payload,
-      prices: [{ label: `${planLabel} Premium`, amount: starsPrice }],
+      prices: [{ label: priceLabel, amount: starsPrice }],
       options: {},
     });
 
@@ -192,6 +204,48 @@ async function handleSuccessfulPayment(msg) {
     payment.providerPaymentChargeId = providerChargeId || null;
     payment.completedAt             = new Date();
     await payment.save();
+
+    // ── Handle 1 Star Boost Pack (Credits Only) ───────────────────────────
+    if (payment.planType === 'boost') {
+      await User.findByIdAndUpdate(payment.userId, {
+        $inc: {
+          adBonusMessages: 20,
+          adBonusImages: 3,
+        },
+      });
+
+      // Invalidate usage cache so new credits take effect immediately
+      const { redisClient } = require('../../config/redis');
+      await redisClient.del('limits:config').catch(() => {});
+      const today = new Date().toISOString().slice(0, 10);
+      await redisClient.del(`usage:${from.id}:${today}`).catch(() => {});
+
+      // Analytics
+      Analytics.increment(today, {
+        paymentsCompleted: 1,
+        totalStarsEarned:  starsAmount,
+      }).catch(() => {});
+
+      // Confirmation message to user
+      await sendMessage(
+        from.id,
+        `🎉 <b>Payment Successful! (1 ⭐)</b>\n\n` +
+        `✨ <b>Credits Added:</b>\n` +
+        `💬 <b>+20 Messages</b>\n` +
+        `🖼️ <b>+3 Uncensored 🔞 Images</b>\n\n` +
+        `Your credits are active immediately. Enjoy chatting with ${config.bot.name}! 💖`
+      );
+
+      logger.info('Boost pack credits granted', {
+        telegramId: from.id,
+        userId: payment.userId,
+        messages: 20,
+        images: 3,
+        starsAmount,
+      });
+
+      return;
+    }
 
     // Calculate subscription period
     const now         = new Date();
