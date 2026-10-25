@@ -79,7 +79,7 @@ async function createInvoice(user, planType, settings) {
     await sendInvoice(user.telegramId, {
       title:       `${config.bot.name} Premium — ${planLabel}`,
       description:
-        `${days} days of unlimited conversations, ${config.limits.premium.dailyImages} images/day, ` +
+        `${days} days of unlimited conversations, ${config.limits.premium.dailyImages} uncensored 🔞 images/day, ` +
         `long-term memory, and exclusive personalities.`,
       payload,
       prices: [{ label: `${planLabel} Premium`, amount: starsPrice }],
@@ -266,7 +266,7 @@ async function handleSuccessfulPayment(msg) {
       `Your subscription is active until <b>${expiryDate}</b>.\n\n` +
       `✨ What you've unlocked:\n` +
       `💬 ${config.limits.premium.dailyMessages} messages/day\n` +
-      `🖼️ ${config.limits.premium.dailyImages} images/day\n` +
+      `🖼️ ${config.limits.premium.dailyImages} uncensored 🔞 images/day\n` +
       `🧠 ${config.limits.premium.memoryLimit} long-term memories\n` +
       `🔒 Exclusive personalities\n\n` +
       `Enjoy the full ${config.bot.name} experience! 💖`

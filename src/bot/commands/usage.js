@@ -90,7 +90,7 @@ async function usageCommand(msg) {
     (!isPremium
       ? `\n` +
         `⭐ <b>Go Premium</b> for Unlimited chat ` +
-        `and ${config.limits.premium.dailyImages} images/day → /premium`
+        `and ${config.limits.premium.dailyImages} uncensored 🔞 images/day → /premium`
       : `\n✨ Enjoying your premium benefits!`);
 
   const keyboard = {

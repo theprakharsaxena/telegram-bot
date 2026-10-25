@@ -65,7 +65,7 @@ async function expireSubscriptions() {
         `⏰ <b>Your Premium has expired.</b>\n\n` +
         `Your subscription ended and you're now on the free plan.\n\n` +
         `💬 You have ${config.limits.free.dailyMessages} messages/day\n` +
-        `🖼️ ${config.limits.free.dailyImages} images/day\n\n` +
+        `🖼️ ${config.limits.free.dailyImages} uncensored 🔞 images/day\n\n` +
         `Renew anytime with /premium to get back unlimited access! ⭐`
       ).catch(() => {}); // don't crash if user blocked the bot
 
