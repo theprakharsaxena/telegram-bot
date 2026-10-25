@@ -20,7 +20,7 @@
  */
 
 const express = require('express');
-const { getBot } = require('../services/bot/telegramService');
+const { getBot, sendMessage } = require('../services/bot/telegramService');
 const config = require('../config/env');
 const logger = require('../utils/logger');
 const { User } = require('../models');
@@ -132,6 +132,16 @@ router.get('/adsgram-reward', async (req, res) => {
       bonusMessages: config.adsgram.bonusMessages,
       bonusImages: config.adsgram.bonusImages,
     });
+
+    // Notify user in chat
+    sendMessage(
+      telegramId,
+      `🎉 <b>Bonus Credits Claimed!</b>\n\n` +
+      `You've received:\n` +
+      `• <b>+${config.adsgram.bonusMessages}</b> Message Credits 💬\n` +
+      `• <b>+${config.adsgram.bonusImages}</b> Image Credits 🖼️\n\n` +
+      `Thank you for supporting ${config.bot.name}! 💖`
+    ).catch(() => {});
 
     res.json({ ok: true, message: 'Reward granted' });
   } catch (err) {

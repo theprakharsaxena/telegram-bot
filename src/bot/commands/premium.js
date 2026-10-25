@@ -108,10 +108,11 @@ async function premiumCommand(msg) {
 
   // Add "Watch Ad" button if Adsgram is enabled
   if (config.adsgram.enabled) {
+    const webAppUrl = `${config.telegram.webhookUrl}/ads/watch?userId=${user.telegramId}`;
     inlineKeyboard.splice(3, 0, [
       {
         text: `🎬 Watch Ad — +${config.adsgram.bonusMessages} msgs & +${config.adsgram.bonusImages} images`,
-        callback_data: 'adsgram:watch',
+        web_app: { url: webAppUrl },
       },
     ]);
   }

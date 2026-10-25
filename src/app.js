@@ -149,6 +149,10 @@ app.use('/webhook', webhookLimiter, webhookRouter);
 const adminRouter = require('./routes/admin');
 app.use('/admin', adminRouter);
 
+// Adsgram WebApp
+const adsRouter = require('./routes/ads');
+app.use('/ads', adsRouter);
+
 // ---------------------------------------------------------------------------
 // 11. Sentry error handler
 // ---------------------------------------------------------------------------

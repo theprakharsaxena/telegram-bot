@@ -188,38 +188,24 @@ async function handleAdsgramCallback(action, query, ctx) {
   }
 
   if (action === 'watch') {
-    // Send the Adsgram rewarded ad
-    // The user must first start the Adsgram bot, then we can send them to the ad
-    // Format: https://t.me/{botId}?start={adUnitId}_{userId}
-    const adUrl = `https://t.me/${config.adsgram.botId}?start=${config.adsgram.adUnitId}_${user.telegramId}`;
+    const webAppUrl = `${config.telegram.webhookUrl}/ads/watch?userId=${user.telegramId}`;
 
-    logger.info('Sending Adsgram ad URL', { adUrl, telegramId: user.telegramId });
+    logger.info('Sending Adsgram WebApp ad button', { webAppUrl, telegramId: user.telegramId });
 
     await sendMessage(
       chatId,
-      `🎬 <b>Watch Ad to Get Bonus Credits!</b>\n\n` +
-      `Watch this short ad to receive:\n` +
-      `• +${config.adsgram.bonusMessages} message credits\n` +
-      `• +${config.adsgram.bonusImages} image credits\n\n` +
-      `<b>⚠️ IMPORTANT - Follow these steps:</b>\n` +
-      `1. First click "🤖 Start Adsgram Bot" below\n` +
-      `2. Send /start to the Adsgram bot\n` +
-      `3. Then come back here and click "🎬 Watch Ad Now"\n\n` +
-      `If you skip step 1-2, you'll get an error saying "user doesn't exist".\n\n` +
-      `Rewards are granted automatically after watching the full ad.`,
+      `🎬 <b>Watch a Short Ad to Get Bonus Credits!</b>\n\n` +
+      `🎁 <b>Your Rewards:</b>\n` +
+      `• <b>+${config.adsgram.bonusMessages}</b> Message Credits 💬\n` +
+      `• <b>+${config.adsgram.bonusImages}</b> Image Credits 🖼️\n\n` +
+      `Tap <b>"🎬 Watch Ad Now"</b> below to play the video. Your credits will be added to your account as soon as the video finishes!`,
       {
         reply_markup: {
           inline_keyboard: [
             [
               {
-                text: '🤖 Step 1: Start Adsgram Bot',
-                url: `https://t.me/${config.adsgram.botId}?start`,
-              },
-            ],
-            [
-              {
-                text: '🎬 Step 2: Watch Ad Now',
-                url: adUrl,
+                text: '🎬 Watch Ad Now (+20 💬 / +3 🖼️)',
+                web_app: { url: webAppUrl },
               },
             ],
             [{ text: '❌ Cancel', callback_data: 'back' }],

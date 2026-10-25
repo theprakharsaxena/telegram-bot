@@ -99,7 +99,21 @@ async function usageCommand(msg) {
         { text: '💬 Chat now',      callback_data: 'action:chat' },
         { text: '📈 Profile',       callback_data: 'action:profile' },
       ],
-      ...(!isPremium ? [[{ text: '⭐ Upgrade to Premium', callback_data: 'action:premium' }]] : []),
+      ...(!isPremium
+        ? [
+            [{ text: '⭐ Upgrade to Premium', callback_data: 'action:premium' }],
+            ...(config.adsgram.enabled
+              ? [
+                  [
+                    {
+                      text: `🎬 Watch Ad (+${config.adsgram.bonusMessages} 💬 / +${config.adsgram.bonusImages} 🖼️)`,
+                      web_app: { url: `${config.telegram.webhookUrl}/ads/watch?userId=${user.telegramId}` },
+                    },
+                  ],
+                ]
+              : []),
+          ]
+        : []),
     ],
   };
 

@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Watch Ad — <%= botName %></title>
+  <!-- Telegram WebApp SDK -->
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <!-- Adsgram SDK -->
+  <script src="https://sad.adsgram.ai/js/sad.min.js"></script>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    body {
+      background: #0f1117;
+      color: #f1f5f9;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 24px 16px;
+      text-align: center;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 380px;
+      background: rgba(30, 41, 59, 0.7);
+      backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 24px;
+      padding: 32px 24px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .icon-wrapper {
+      width: 72px;
+      height: 72px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #ec4899, #8b5cf6);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 34px;
+      box-shadow: 0 10px 25px rgba(236, 72, 153, 0.35);
+      animation: pulse 2.5s infinite ease-in-out;
+    }
+
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+    }
+
+    h1 {
+      font-size: 22px;
+      font-weight: 700;
+      color: #ffffff;
+      letter-spacing: -0.02em;
+    }
+
+    .rewards-card {
+      background: rgba(15, 23, 42, 0.6);
+      border: 1px solid rgba(236, 72, 153, 0.2);
+      border-radius: 16px;
+      padding: 14px 18px;
+      width: 100%;
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+    }
+
+    .reward-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .reward-val {
+      font-size: 19px;
+      font-weight: 800;
+      color: #f472b6;
+    }
+
+    .reward-label {
+      font-size: 12px;
+      color: #94a3b8;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .status-text {
+      font-size: 14px;
+      color: #cbd5e1;
+      line-height: 1.5;
+      min-height: 42px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .btn {
+      width: 100%;
+      padding: 16px 20px;
+      border-radius: 14px;
+      font-size: 16px;
+      font-weight: 700;
+      border: none;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      outline: none;
+      text-decoration: none;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #ec4899 0%, #a855f7 100%);
+      color: white;
+      box-shadow: 0 8px 20px rgba(168, 85, 247, 0.35);
+    }
+
+    .btn-primary:active {
+      transform: scale(0.98);
+      opacity: 0.95;
+    }
+
+    .btn-primary:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .btn-close {
+      background: transparent;
+      color: #94a3b8;
+      font-size: 13px;
+      padding: 8px;
+      border: none;
+      cursor: pointer;
+    }
+
+    .spinner {
+      width: 18px;
+      height: 18px;
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      border-top-color: white;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      display: inline-block;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="icon-wrapper">🎬</div>
+    
+    <div>
+      <h1>Watch Ad to Get Bonus</h1>
+      <p style="font-size: 13px; color: #94a3b8; margin-top: 4px;">Watch a short sponsored video</p>
+    </div>
+
+    <div class="rewards-card">
+      <div class="reward-item">
+        <span class="reward-val">+<%= bonusMessages %></span>
+        <span class="reward-label">Messages</span>
+      </div>
+      <div style="width: 1px; height: 28px; background: rgba(255, 255, 255, 0.1);"></div>
+      <div class="reward-item">
+        <span class="reward-val">+<%= bonusImages %></span>
+        <span class="reward-label">Images</span>
+      </div>
+    </div>
+
+    <div class="status-text" id="statusMessage">
+      Tap the button below to watch the video and earn your bonus credits.
+    </div>
+
+    <button class="btn btn-primary" id="playBtn">
+      ▶️ Play Ad Now
+    </button>
+
+    <button class="btn-close" id="closeBtn">
+      Cancel & Close
+    </button>
+  </div>
+
+  <script>
+    // Initialize Telegram WebApp
+    if (window.Telegram && window.Telegram.WebApp) {
+      window.Telegram.WebApp.ready();
+      window.Telegram.WebApp.expand();
+    }
+
+    const userId = "<%= userId %>";
+    const rawBlockId = "<%= blockId %>";
+    // Strip optional "bot-" prefix if needed by Adsgram SDK
+    const blockId = rawBlockId.replace(/^bot-/, '');
+
+    const playBtn = document.getElementById('playBtn');
+    const closeBtn = document.getElementById('closeBtn');
+    const statusMsg = document.getElementById('statusMessage');
+
+    closeBtn.addEventListener('click', () => {
+      if (window.Telegram && window.Telegram.WebApp) {
+        window.Telegram.WebApp.close();
+      }
+    });
+
+    let adController = null;
+
+    try {
+      if (window.Adsgram) {
+        // Try with blockId (numeric) or raw block ID
+        adController = window.Adsgram.init({
+          blockId: blockId || rawBlockId,
+          debug: false
+        });
+      }
+    } catch (e) {
+      console.error("Adsgram init error:", e);
+    }
+
+    playBtn.addEventListener('click', async () => {
+      if (!adController) {
+        try {
+          if (window.Adsgram) {
+            adController = window.Adsgram.init({
+              blockId: blockId || rawBlockId,
+              debug: false
+            });
+          }
+        } catch (e) {
+          console.error("Adsgram re-init error:", e);
+        }
+      }
+
+      if (!adController) {
+        statusMsg.innerHTML = '<span style="color: #ef4444;">⚠️ Ad service unavailable. Please try again later.</span>';
+        return;
+      }
+
+      playBtn.disabled = true;
+      playBtn.innerHTML = '<span class="spinner"></span> Playing Ad...';
+      statusMsg.innerHTML = 'Showing sponsored ad... Please watch till the end.';
+
+      adController.show().then(async (result) => {
+        // User watched the ad to completion!
+        statusMsg.innerHTML = '<span style="color: #10b981;">🎉 Ad complete! Adding your credits...</span>';
+        playBtn.innerHTML = '✅ Claimed!';
+        playBtn.style.background = '#10b981';
+
+        try {
+          const res = await fetch(`/webhook/adsgram-reward?userid=${userId}`);
+          const data = await res.json();
+          if (data.ok) {
+            statusMsg.innerHTML = '<span style="color: #10b981;">🎉 +<%= bonusMessages %> Messages and +<%= bonusImages %> Images Added!</span>';
+            setTimeout(() => {
+              if (window.Telegram && window.Telegram.WebApp) {
+                window.Telegram.WebApp.close();
+              }
+            }, 1800);
+          } else {
+            statusMsg.innerHTML = '<span style="color: #f59e0b;">⚠️ ' + (data.message || 'Error granting reward') + '</span>';
+            playBtn.disabled = false;
+            playBtn.innerHTML = '▶️ Play Ad Now';
+          }
+        } catch (err) {
+          console.error("Reward fetch error:", err);
+          statusMsg.innerHTML = '<span style="color: #f59e0b;">Reward recorded. Check your chat!</span>';
+          setTimeout(() => {
+            if (window.Telegram && window.Telegram.WebApp) {
+              window.Telegram.WebApp.close();
+            }
+          }, 1800);
+        }
+      }).catch((err) => {
+        console.warn("Ad closed early or failed:", err);
+        statusMsg.innerHTML = '<span style="color: #f87171;">⚠️ You must watch the complete ad to get bonus credits.</span>';
+        playBtn.disabled = false;
+        playBtn.innerHTML = '🔄 Try Again';
+      });
+    });
+  </script>
+</body>
+</html>
